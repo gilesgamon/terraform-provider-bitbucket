@@ -17,9 +17,10 @@ import (
 
 // BranchingModel is the data we need to send to create a new branching model for the repository
 type BranchingModel struct {
-	Development *BranchModel  `json:"development,omitempty"`
-	Production  *BranchModel  `json:"production,omitempty"`
-	BranchTypes []*BranchType `json:"branch_types"`
+	Development           *BranchModel  `json:"development,omitempty"`
+	Production            *BranchModel  `json:"production,omitempty"`
+	BranchTypes           []*BranchType `json:"branch_types"`
+	DefaultBranchDeletion *bool         `json:"default_branch_deletion,omitempty"`
 }
 
 type BranchModel struct {
@@ -138,6 +139,10 @@ func resourceBranchingModel() *schema.Resource {
 					},
 				},
 			},
+			"default_branch_deletion": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -221,6 +226,7 @@ func resourceBranchingModelsRead(ctx context.Context, d *schema.ResourceData, m 
 
 	d.Set("owner", owner)
 	d.Set("repository", repo)
+	d.Set("default_branch_deletion", branchingModel.DefaultBranchDeletion)
 	d.Set("development", flattenBranchModel(branchingModel.Development, "development"))
 	d.Set("branch_type", flattenBranchTypes(branchingModel.BranchTypes))
 	d.Set("production", flattenBranchModel(branchingModel.Production, "production"))
@@ -260,6 +266,10 @@ func expandBranchingModel(d *schema.ResourceData) *BranchingModel {
 		model.BranchTypes = expandBranchTypes(v.(*schema.Set))
 	} else {
 		model.BranchTypes = make([]*BranchType, 0)
+	}
+
+	if v, ok := d.GetOkExists("default_branch_deletion"); ok {
+		model.DefaultBranchDeletion = v.(*bool)
 	}
 
 	return model

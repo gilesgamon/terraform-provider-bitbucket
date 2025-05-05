@@ -79,6 +79,7 @@ The following arguments are supported:
 * `name` - (Optional) The configured branch. It must be null when `use_mainbranch` is true. Otherwise it must be a non-empty value. It is possible for the configured branch to not exist (e.g. it was deleted after the settings are set).
 * `use_mainbranch` - (Optional) Indicates if the setting points at an explicit branch (`false`) or tracks the main branch (`true`). When `true` the name must be null or not provided. When `false` the name must contain a non-empty branch name.
 * `branch_does_not_exist` - (Optional) Optional and only returned for a repository's branching model. Indicates if the indicated branch exists on the repository (`false`) or not (`true`). This is useful for determining a fallback to the mainbranch when a repository is inheriting its project's branching model.
+* `default_branch_deletion` - (Optional) Sets the default for deleting the source branch after merging a pull request. This setting can be overridden on merge.
 
 ### Branch Type
 
