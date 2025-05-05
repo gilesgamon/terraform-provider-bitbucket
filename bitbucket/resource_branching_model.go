@@ -17,9 +17,10 @@ import (
 
 // BranchingModel is the data we need to send to create a new branching model for the repository
 type BranchingModel struct {
-	Development *BranchModel  `json:"development,omitempty"`
-	Production  *BranchModel  `json:"production,omitempty"`
-	BranchTypes []*BranchType `json:"branch_types"`
+	Development           *BranchModel  `json:"development,omitempty"`
+	Production            *BranchModel  `json:"production,omitempty"`
+	BranchTypes           []*BranchType `json:"branch_types"`
+	DefaultBranchDeletion *bool         `json:"default_branch_deletion,omitempty"`
 }
 
 type BranchModel struct {
@@ -138,6 +139,10 @@ func resourceBranchingModel() *schema.Resource {
 					},
 				},
 			},
+			"default_branch_deletion": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -172,7 +177,7 @@ func resourceBranchingModelsPut(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", d.Get("owner").(string), d.Get("repository").(string))))
+	d.SetId(fmt.Sprintf("%s/%s", d.Get("owner").(string), d.Get("repository").(string)))
 
 	return resourceBranchingModelsRead(ctx, d, m)
 }
@@ -221,6 +226,7 @@ func resourceBranchingModelsRead(ctx context.Context, d *schema.ResourceData, m 
 
 	d.Set("owner", owner)
 	d.Set("repository", repo)
+	d.Set("default_branch_deletion", branchingModel.DefaultBranchDeletion)
 	d.Set("development", flattenBranchModel(branchingModel.Development, "development"))
 	d.Set("branch_type", flattenBranchTypes(branchingModel.BranchTypes))
 	d.Set("production", flattenBranchModel(branchingModel.Production, "production"))
@@ -260,6 +266,11 @@ func expandBranchingModel(d *schema.ResourceData) *BranchingModel {
 		model.BranchTypes = expandBranchTypes(v.(*schema.Set))
 	} else {
 		model.BranchTypes = make([]*BranchType, 0)
+	}
+
+	//nolint:staticcheck
+	if v, ok := d.GetOkExists("default_branch_deletion"); ok {
+		model.DefaultBranchDeletion = v.(*bool)
 	}
 
 	return model
@@ -383,7 +394,7 @@ func branchingModelId(id string) (string, string, error) {
 	parts := strings.Split(id, "/")
 
 	if len(parts) != 2 {
-		return "", "", fmt.Errorf("Unexpected format of ID (%q), expected OWNER/REPOSITORY", id)
+		return "", "", fmt.Errorf("unexpected format of ID (%q), expected OWNER/REPOSITORY", id)
 	}
 
 	return parts[0], parts[1], nil

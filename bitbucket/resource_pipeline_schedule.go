@@ -107,7 +107,7 @@ func resourcePipelineScheduleCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s/%s", workspace, repo, schedule.Uuid)))
+	d.SetId(fmt.Sprintf("%s/%s/%s", workspace, repo, schedule.Uuid))
 
 	if !d.Get("enabled").(bool) {
 		pipeScheduleUpdate := expandUpdatePipelineSchedule(d)

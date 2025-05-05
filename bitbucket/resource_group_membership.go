@@ -63,7 +63,7 @@ func resourceGroupMembershipsPut(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s/%s", workspace, groupSlug, uuid)))
+	d.SetId(fmt.Sprintf("%s/%s/%s", workspace, groupSlug, uuid))
 
 	return resourceGroupMembershipsRead(ctx, d, m)
 }
