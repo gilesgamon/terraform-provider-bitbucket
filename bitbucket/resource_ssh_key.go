@@ -75,7 +75,7 @@ func resourceSshKeysCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", user, sshKeyReq.Uuid)))
+	d.SetId(fmt.Sprintf("%s/%s", user, sshKeyReq.Uuid))
 
 	return resourceSshKeysRead(ctx, d, m)
 }

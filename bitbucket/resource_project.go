@@ -114,6 +114,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	var projectKey string
 	projectKey = d.Get("key").(string)
 	if projectKey == "" {
+		//nolint:staticcheck
 		projectKey = d.Get("key").(string)
 	}
 
@@ -160,12 +161,6 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	projectApi := c.ApiClient.ProjectsApi
 	project := newProjectFromResource(d)
 
-	var projectKey string
-	projectKey = d.Get("key").(string)
-	if projectKey == "" {
-		projectKey = d.Get("key").(string)
-	}
-
 	owner := d.Get("owner").(string)
 
 	log.Printf("[DEBUG] Project Create Body: %#v", project)
@@ -175,7 +170,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", owner, projRes.Key)))
+	d.SetId(fmt.Sprintf("%s/%s", owner, projRes.Key))
 
 	return resourceProjectRead(ctx, d, m)
 }

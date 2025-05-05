@@ -91,7 +91,7 @@ func resourceDeployKeysCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	log.Printf("[DEBUG] Deploy Keys Create Response Decoded: %#v", deployKeyRes)
 
-	d.SetId(string(fmt.Sprintf("%s/%s/%d", workspace, repo, deployKeyRes.ID)))
+	d.SetId(fmt.Sprintf("%s/%s/%d", workspace, repo, deployKeyRes.ID))
 
 	return resourceDeployKeysRead(ctx, d, m)
 }

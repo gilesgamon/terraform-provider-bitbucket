@@ -86,7 +86,7 @@ func resourcePipelineSshKnownHostsCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s/%s", workspace, repo, host.Uuid)))
+	d.SetId(fmt.Sprintf("%s/%s/%s", workspace, repo, host.Uuid))
 
 	return resourcePipelineSshKnownHostsRead(ctx, d, m)
 }

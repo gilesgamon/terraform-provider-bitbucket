@@ -136,10 +136,10 @@ func resourceForkedRepository() *schema.Resource {
 				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 					v := val.(map[string]interface{})
 					if _, ok := v["slug"]; !ok {
-						errs = append(errs, fmt.Errorf("A repository 'slug' is required when specifying a parent to fork from."))
+						errs = append(errs, fmt.Errorf("a repository 'slug' is required when specifying a parent to fork from"))
 					}
 					if _, ok := v["owner"]; !ok {
-						errs = append(errs, fmt.Errorf("A repository 'owner' is required when specifying a parent to fork from."))
+						errs = append(errs, fmt.Errorf("a repository 'owner' is required when specifying a parent to fork from"))
 					}
 					return warns, errs
 				},
@@ -215,16 +215,17 @@ func resourceForkedRepositoryCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", d.Get("owner").(string), repoSlug)))
+	d.SetId(fmt.Sprintf("%s/%s", d.Get("owner").(string), repoSlug))
 
 	pipelinesEnabled := d.Get("pipelines_enabled").(bool)
 	pipelinesConfig := &bitbucket.PipelinesConfig{Enabled: pipelinesEnabled}
 
+	//nolint:all
 	retryErr := resource.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		_, pipelineResponse, err := pipeApi.UpdateRepositoryPipelineConfig(c.AuthContext, *pipelinesConfig, workspace, repoSlug)
 		if pipelineResponse.StatusCode == 403 || pipelineResponse.StatusCode == 404 {
 			return resource.RetryableError(
-				fmt.Errorf("Permissions error setting Pipelines config, retrying..."),
+				fmt.Errorf("permissions error setting Pipelines config, retrying"),
 			)
 		}
 
@@ -315,9 +316,10 @@ func resourceForkedRepositoryRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	if res.StatusCode == 200 {
+	switch res.StatusCode {
+	case http.StatusOK:
 		d.Set("pipelines_enabled", pipelinesConfigReq.Enabled)
-	} else if res.StatusCode == http.StatusNotFound {
+	case http.StatusNotFound:
 		d.Set("pipelines_enabled", false)
 	}
 

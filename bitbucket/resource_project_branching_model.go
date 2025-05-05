@@ -148,7 +148,7 @@ func resourceProjectBranchingModelsPut(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", d.Get("workspace").(string), d.Get("project").(string))))
+	d.SetId(fmt.Sprintf("%s/%s", d.Get("workspace").(string), d.Get("project").(string)))
 
 	return resourceProjectBranchingModelsRead(ctx, d, m)
 }

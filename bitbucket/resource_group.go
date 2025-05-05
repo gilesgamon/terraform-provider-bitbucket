@@ -91,7 +91,7 @@ func resourceGroupsCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	log.Printf("[DEBUG] Group Req Response Decoded: %#v", group)
 
-	d.SetId(string(fmt.Sprintf("%s/%s", workspace, group.Slug)))
+	d.SetId(fmt.Sprintf("%s/%s", workspace, group.Slug))
 
 	return resourceGroupsRead(ctx, d, m)
 }

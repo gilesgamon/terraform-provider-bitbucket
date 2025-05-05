@@ -199,7 +199,7 @@ func resourceBranchRestrictionsCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%v", branchRestrictionReq.Id)))
+	d.SetId(fmt.Sprintf("%v", branchRestrictionReq.Id))
 
 	return resourceBranchRestrictionsRead(ctx, d, m)
 }
@@ -221,7 +221,7 @@ func resourceBranchRestrictionsRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%v", brRes.Id)))
+	d.SetId(fmt.Sprintf("%v", brRes.Id))
 	d.Set("kind", brRes.Kind)
 	d.Set("pattern", brRes.Pattern)
 	d.Set("value", brRes.Value)

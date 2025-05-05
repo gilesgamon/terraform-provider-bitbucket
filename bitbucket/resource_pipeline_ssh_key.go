@@ -59,7 +59,7 @@ func resourcePipelineSshKeysPut(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", workspace, repo)))
+	d.SetId(fmt.Sprintf("%s/%s", workspace, repo))
 
 	return resourcePipelineSshKeysRead(ctx, d, m)
 }

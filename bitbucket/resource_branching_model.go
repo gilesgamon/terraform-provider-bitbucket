@@ -177,7 +177,7 @@ func resourceBranchingModelsPut(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", d.Get("owner").(string), d.Get("repository").(string))))
+	d.SetId(fmt.Sprintf("%s/%s", d.Get("owner").(string), d.Get("repository").(string)))
 
 	return resourceBranchingModelsRead(ctx, d, m)
 }
@@ -268,6 +268,7 @@ func expandBranchingModel(d *schema.ResourceData) *BranchingModel {
 		model.BranchTypes = make([]*BranchType, 0)
 	}
 
+	//nolint:staticcheck
 	if v, ok := d.GetOkExists("default_branch_deletion"); ok {
 		model.DefaultBranchDeletion = v.(*bool)
 	}
@@ -393,7 +394,7 @@ func branchingModelId(id string) (string, string, error) {
 	parts := strings.Split(id, "/")
 
 	if len(parts) != 2 {
-		return "", "", fmt.Errorf("Unexpected format of ID (%q), expected OWNER/REPOSITORY", id)
+		return "", "", fmt.Errorf("unexpected format of ID (%q), expected OWNER/REPOSITORY", id)
 	}
 
 	return parts[0], parts[1], nil

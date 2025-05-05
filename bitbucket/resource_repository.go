@@ -278,7 +278,7 @@ func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	d.SetId(string(fmt.Sprintf("%s/%s", d.Get("owner").(string), repoSlug)))
+	d.SetId(fmt.Sprintf("%s/%s", d.Get("owner").(string), repoSlug))
 
 	// nolint:staticcheck
 	if v, ok := d.GetOkExists("pipelines_enabled"); ok {
@@ -384,9 +384,10 @@ func resourceRepositoryRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	if res.StatusCode == 200 {
+	switch res.StatusCode {
+	case http.StatusOK:
 		d.Set("pipelines_enabled", pipelinesConfigReq.Enabled)
-	} else if res.StatusCode == http.StatusNotFound {
+	case http.StatusNotFound:
 		d.Set("pipelines_enabled", false)
 	}
 
@@ -543,8 +544,8 @@ func createRepositoryInheritanceSettings(d *schema.ResourceData) *RepositoryInhe
 
 	// nolint:staticcheck
 	if v, ok := d.GetOkExists("inherit_default_merge_strategy"); ok {
-		strat := v.(bool)
-		setting.DefaultMergeStrategy = &strat
+		strategy := v.(bool)
+		setting.DefaultMergeStrategy = &strategy
 	}
 
 	return setting
