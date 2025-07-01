@@ -331,7 +331,7 @@ func dataFileRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 func processJson(fileBody []byte, contentType string, include_commit bool, include_commit_links bool, include_links bool) (interface{}, error) {
 
 	if fileBody == nil {
-		return nil, fmt.Errorf("Missing reponse body.")
+		return nil, fmt.Errorf("Missing response body.")
 	}
 	var fileValue FileValue
 	err := fileValue.decode(fileBody, contentType)
@@ -465,7 +465,7 @@ func (f *FileValue) decode(data []byte, contentType string) (err error) {
 			}
 		}
 	default:
-		return fmt.Errorf("Unknown metadata content type %s", contentType)
+		return fmt.Errorf("unknown metadata content type %s", contentType)
 	}
 	return nil
 }
