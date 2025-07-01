@@ -240,11 +240,11 @@ func dataReadRepository(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	if res == nil {
-		return diag.Errorf("No response returned from repositories call. Make sure your credentials are accurate.")
+		return diag.Errorf("no response returned from repositories call. Make sure your credentials are accurate.")
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("Unable to locate repository with slug/UUID %s in workspace %s", repoSlug, workspace)
+		return diag.Errorf("unable to locate repository with slug/UUID %s in workspace %s", repoSlug, workspace)
 	}
 
 	if res.Body == nil {

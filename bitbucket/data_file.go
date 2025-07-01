@@ -296,11 +296,11 @@ func dataFileRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 	}
 
 	if res == nil {
-		return diag.Errorf("No response returned from repositories src commit call. Make sure your credentials are accurate.")
+		return diag.Errorf("no response returned from repositories src commit call. Make sure your credentials are accurate.")
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("Unable to locate file with params (%s): ", dumpResourceData(d, dataFile().Schema))
+		return diag.Errorf("unable to locate file with params (%s): ", dumpResourceData(d, dataFile().Schema))
 	}
 
 	if res.Body == nil {
@@ -331,12 +331,12 @@ func dataFileRead(ctx context.Context, d *schema.ResourceData, m interface{}) di
 func processJson(fileBody []byte, contentType string, include_commit bool, include_commit_links bool, include_links bool) (interface{}, error) {
 
 	if fileBody == nil {
-		return nil, fmt.Errorf("Missing response body.")
+		return nil, fmt.Errorf("missing response body.")
 	}
 	var fileValue FileValue
 	err := fileValue.decode(fileBody, contentType)
 	if err != nil {
-		return nil, fmt.Errorf("Error while attempting to decode file metadata: %v", err)
+		return nil, fmt.Errorf("error while attempting to decode file metadata: %v", err)
 	}
 	return flattenFileReturn(&fileValue, include_commit, include_commit_links, include_links), nil
 }
