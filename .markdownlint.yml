@@ -11,3 +11,5 @@ MD010:
 # https://github.com/DavidAnson/markdownlint/blob/master/doc/Rules.md
 
 MD013: false
+MD033: false
+MD022: false

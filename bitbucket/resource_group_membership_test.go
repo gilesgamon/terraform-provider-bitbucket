@@ -64,10 +64,6 @@ func testAccCheckBitbucketGroupMembershipDestroy(s *terraform.State) error {
 			continue
 		}
 
-		if err != nil {
-			return err
-		}
-
 		var members []*UserGroupMembership
 		body, readerr := io.ReadAll(response.Body)
 		if readerr != nil {
