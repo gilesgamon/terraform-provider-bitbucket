@@ -5,14 +5,14 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:  # Add this for manual testing
+  workflow_dispatch:  # For testing
 
 permissions:
   contents: write
 
 jobs:
   goreleaser:
-    runs-on: [self-hosted, docker, linux, custom]  # Changed to your runner
+    runs-on: [self-hosted, docker, linux, custom]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,8 +34,8 @@ jobs:
         uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
-          version: latest
+          version: "~> v1.26"  # Pin to v1.26.x instead of latest
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
