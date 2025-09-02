@@ -112,6 +112,41 @@ func Provider() *schema.Provider {
 			"bitbucket_user":                      dataUser(),
 			"bitbucket_workspace":                 dataWorkspace(),
 			"bitbucket_workspace_members":         dataWorkspaceMembers(),
+			// Enhanced data sources for pipeline integration
+			"bitbucket_tag":                       dataTag(),
+			"bitbucket_commit":                    dataCommit(),
+			"bitbucket_branch":                    dataBranch(),
+			"bitbucket_pull_request":              dataPullRequest(),
+			"bitbucket_pipeline":                  dataPipeline(),
+			// Phase 1: Enhanced Git Operations
+			"bitbucket_commit_comments":           dataCommitComments(),
+			"bitbucket_commit_statuses":           dataCommitStatuses(),
+			"bitbucket_commit_properties":         dataCommitProperties(),
+			"bitbucket_commit_reports":            dataCommitReports(),
+			"bitbucket_commit_pullrequests":       dataCommitPullRequests(),
+			"bitbucket_commit_approvals":         dataCommitApprovals(),
+			"bitbucket_commits":                   dataCommits(),
+			"bitbucket_commit_diff":               dataCommitDiff(),
+			"bitbucket_commit_diffstat":          dataCommitDiffstat(),
+			// Phase 2: Advanced Repository Features
+			"bitbucket_issues":                   dataIssues(),
+			"bitbucket_issue":                    dataIssue(),
+			"bitbucket_issue_comments":           dataIssueComments(),
+			"bitbucket_pullrequests":             dataPullRequests(),
+			"bitbucket_repository_settings":      dataRepositorySettings(),
+			"bitbucket_repository_permissions":   dataRepositoryPermissions(),
+			"bitbucket_repository_variables":     dataRepositoryVariables(),
+			"bitbucket_repository_deploy_keys":   dataRepositoryDeployKeys(),
+			// Phase 3: Pipeline & CI/CD
+			"bitbucket_pipelines":               dataPipelines(),
+			"bitbucket_pipeline_steps":          dataPipelineSteps(),
+			// Phase 4: Workspace & Project Management
+			"bitbucket_workspaces":              dataWorkspaces(),
+			"bitbucket_projects":                dataProjects(),
+			// Phase 5: User & Group Management
+			"bitbucket_users":                   dataUsers(),
+			// Phase 6: Advanced Features
+			"bitbucket_addons":                  dataAddons(),
 		},
 	}
 }
