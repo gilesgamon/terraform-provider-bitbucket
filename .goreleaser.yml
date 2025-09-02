@@ -1,7 +1,7 @@
 # .goreleaser.yml
-version: 1  # Change back to version 1 for GoReleaser v1.26.x
+version: 1
 
-project_name: tx  # Replace with your actual project name
+project_name: terraform-provider-bitbucket
 
 builds:
   - env:
