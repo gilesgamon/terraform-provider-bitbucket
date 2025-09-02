@@ -1,16 +1,18 @@
+# .github/workflows/release.yml
 name: release
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:  # Add this for manual testing
 
 permissions:
   contents: write
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, docker, linux, custom]  # Changed to your runner
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,4 +38,4 @@ jobs:
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}TOKEN }}
