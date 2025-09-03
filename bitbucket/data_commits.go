@@ -24,6 +24,11 @@ func dataCommits() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"latest_commit_hash": {
+				Type:        schema.TypeString,
+				Description: "Hash of the most recent commit",
+				Computed:    true,
+			},
 			"commits": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -153,4 +158,9 @@ func flattenCommits(c *CommitsResponse, d *schema.ResourceData) {
 	}
 
 	d.Set("commits", commits)
+	
+	// Set the latest commit hash if we have commits
+	if len(c.Values) > 0 {
+		d.Set("latest_commit_hash", c.Values[0].Hash)
+	}
 }

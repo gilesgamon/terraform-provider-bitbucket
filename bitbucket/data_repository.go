@@ -163,6 +163,21 @@ func dataRepository() *schema.Resource {
 					},
 				},
 			},
+			"default_branch_hash": {
+				Type:        schema.TypeString,
+				Description: "Hash of the default branch (e.g., main/master)",
+				Computed:    true,
+			},
+			"latest_commit_hash": {
+				Type:        schema.TypeString,
+				Description: "Hash of the most recent commit",
+				Computed:    true,
+			},
+			"head_commit_hash": {
+				Type:        schema.TypeString,
+				Description: "Hash of the HEAD commit",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -217,6 +232,10 @@ func flattenRepository(r *bitbucket.Repository, d *schema.ResourceData) {
 	d.Set("uuid", r.Uuid)
 	if r.Mainbranch != nil {
 		d.Set("main_branch", r.Mainbranch.Name)
+		// Set default branch hash if available
+		if r.Mainbranch.Target != nil && r.Mainbranch.Target.Hash != "" {
+			d.Set("default_branch_hash", r.Mainbranch.Target.Hash)
+		}
 	}
 	d.Set("project", flattenProject(r.Project))
 	d.Set("link", flattenLinks(r.Links))
@@ -270,5 +289,56 @@ func dataReadRepository(ctx context.Context, d *schema.ResourceData, m interface
 
 	d.SetId(repo.Uuid)
 	flattenRepository(&repo, d)
+	
+	// Fetch latest commit hash for additional hash information
+	if err := fetchLatestCommitHash(ctx, client, workspace, repoSlug, d); err != nil {
+		log.Printf("[WARN] Failed to fetch latest commit hash: %v", err)
+	}
+	
+	return nil
+}
+
+// fetchLatestCommitHash fetches the latest commit hash from the repository
+func fetchLatestCommitHash(ctx context.Context, client Client, workspace, repoSlug string, d *schema.ResourceData) error {
+	// Get the main branch name first
+	mainBranch := d.Get("main_branch").(string)
+	if mainBranch == "" {
+		return fmt.Errorf("main branch not available")
+	}
+	
+	// Fetch the latest commit from the main branch
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s", workspace, repoSlug, mainBranch)
+	
+	res, err := client.Get(url)
+	if err != nil {
+		return fmt.Errorf("failed to fetch latest commit: %w", err)
+	}
+	
+	if res.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("main branch %s not found", mainBranch)
+	}
+	
+	if res.Body == nil {
+		return fmt.Errorf("no response body from commit API")
+	}
+	
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read commit response: %w", err)
+	}
+	
+	var commitResponse struct {
+		Hash string `json:"hash"`
+	}
+	
+	if err := json.Unmarshal(body, &commitResponse); err != nil {
+		return fmt.Errorf("failed to parse commit response: %w", err)
+	}
+	
+	if commitResponse.Hash != "" {
+		d.Set("latest_commit_hash", commitResponse.Hash)
+		d.Set("head_commit_hash", commitResponse.Hash) // For most repos, latest = head
+	}
+	
 	return nil
 }

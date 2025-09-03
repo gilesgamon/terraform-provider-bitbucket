@@ -366,18 +366,24 @@ func resourceRepositoryRead(ctx context.Context, d *schema.ResourceData, m inter
 	d.Set("fork_policy", repoRes.ForkPolicy)
 	// d.Set("website", repoRes.Website)
 	d.Set("description", repoRes.Description)
-	d.Set("project_key", repoRes.Project.Key)
+	if repoRes.Project != nil {
+		d.Set("project_key", repoRes.Project.Key)
+	}
 	d.Set("uuid", repoRes.Uuid)
 
-	for _, cloneURL := range repoRes.Links.Clone {
-		if cloneURL.Name == "https" {
-			d.Set("clone_https", cloneURL.Href)
-		} else {
-			d.Set("clone_ssh", cloneURL.Href)
+	if repoRes.Links != nil && repoRes.Links.Clone != nil {
+		for _, cloneURL := range repoRes.Links.Clone {
+			if cloneURL.Name == "https" {
+				d.Set("clone_https", cloneURL.Href)
+			} else {
+				d.Set("clone_ssh", cloneURL.Href)
+			}
 		}
 	}
 
-	d.Set("link", flattenLinks(repoRes.Links))
+	if repoRes.Links != nil {
+		d.Set("link", flattenLinks(repoRes.Links))
+	}
 
 	pipelinesConfigReq, res, err := pipeApi.GetRepositoryPipelineConfig(c.AuthContext, workspace, repoSlug)
 	if err := handleClientError(res, err); err != nil && res.StatusCode != http.StatusNotFound {
