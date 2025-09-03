@@ -24,25 +24,24 @@ func dataCommitStatuses() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"commit_sha": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Commit SHA to retrieve statuses for",
+			"commit": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"statuses": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"uuid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"key": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
+						"refname": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -54,6 +53,14 @@ func dataCommitStatuses() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"created_on": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -62,17 +69,12 @@ func dataCommitStatuses() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"type": {
-							Type:     schema.TypeString,
+						"links": {
+							Type:     schema.TypeMap,
 							Computed: true,
-						},
-						"refname": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"commit": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 					},
 				},
@@ -84,15 +86,11 @@ func dataCommitStatuses() *schema.Resource {
 func dataCommitStatusesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workspace := d.Get("workspace").(string)
 	repoSlug := d.Get("repo_slug").(string)
-	commitSha := d.Get("commit_sha").(string)
+	commit := d.Get("commit").(string)
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataCommitStatusesRead", dumpResourceData(d, dataCommitStatuses().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/commit/%s/statuses",
-		workspace,
-		repoSlug,
-		commitSha,
-	)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/statuses", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -104,7 +102,7 @@ func dataCommitStatusesRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate commit %s in repository %s/%s", commitSha, workspace, repoSlug)
+		return diag.Errorf("unable to locate commit %s in repository %s/%s", commit, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
@@ -128,7 +126,7 @@ func dataCommitStatusesRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s/statuses", workspace, repoSlug, commitSha))
+	d.SetId(fmt.Sprintf("%s/%s/commits/%s/statuses", workspace, repoSlug, commit))
 	flattenCommitStatuses(&statusesResponse, d)
 	return nil
 }
@@ -141,18 +139,17 @@ type CommitStatusesResponse struct {
 	Next   string         `json:"next"`
 }
 
-// CommitStatus represents a status for a commit (build, test, etc.)
+// CommitStatus represents a commit status (build/CI status)
 type CommitStatus struct {
+	UUID        string                 `json:"uuid"`
 	Key         string                 `json:"key"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
+	Refname     string                 `json:"refname"`
 	URL         string                 `json:"url"`
 	State       string                 `json:"state"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
 	CreatedOn   string                 `json:"created_on"`
 	UpdatedOn   string                 `json:"updated_on"`
-	Type        string                 `json:"type"`
-	Refname     string                 `json:"refname"`
-	Commit      string                 `json:"commit"`
 	Links       map[string]interface{} `json:"links"`
 }
 
@@ -165,16 +162,16 @@ func flattenCommitStatuses(c *CommitStatusesResponse, d *schema.ResourceData) {
 	statuses := make([]interface{}, len(c.Values))
 	for i, status := range c.Values {
 		statuses[i] = map[string]interface{}{
+			"uuid":        status.UUID,
 			"key":         status.Key,
-			"name":        status.Name,
-			"description": status.Description,
+			"refname":     status.Refname,
 			"url":         status.URL,
 			"state":       status.State,
+			"name":        status.Name,
+			"description": status.Description,
 			"created_on":  status.CreatedOn,
 			"updated_on":  status.UpdatedOn,
-			"type":        status.Type,
-			"refname":     status.Refname,
-			"commit":      status.Commit,
+			"links":       status.Links,
 		}
 	}
 

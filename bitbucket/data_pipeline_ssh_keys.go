@@ -1,0 +1,156 @@
+package bitbucket
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func dataPipelineSSHKeys() *schema.Resource {
+	return &schema.Resource{
+		ReadContext: dataPipelineSSHKeysRead,
+		Schema: map[string]*schema.Schema{
+			"workspace": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"repo_slug": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"ssh_keys": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"uuid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"label": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"comment": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"created_on": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"updated_on": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"links": {
+							Type:     schema.TypeMap,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func dataPipelineSSHKeysRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	workspace := d.Get("workspace").(string)
+	repoSlug := d.Get("repo_slug").(string)
+
+	log.Printf("[DEBUG]: params for %s: %v", "dataPipelineSSHKeysRead", dumpResourceData(d, dataPipelineSSHKeys().Schema))
+
+	url := fmt.Sprintf("2.0/repositories/%s/%s/pipelines/ssh/keys", workspace, repoSlug)
+
+	client := m.(Clients).httpClient
+	res, err := client.Get(url)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if res == nil {
+		return diag.Errorf("no response returned from pipeline SSH keys call. Make sure your credentials are accurate.")
+	}
+
+	if res.StatusCode == http.StatusNotFound {
+		return diag.Errorf("unable to locate repository %s/%s", workspace, repoSlug)
+	}
+
+	if res.Body == nil {
+		return diag.Errorf("error reading pipeline SSH keys with params (%s): ", dumpResourceData(d, dataPipelineSSHKeys().Schema))
+	}
+
+	if err := handleClientError(res, err); err != nil {
+		return diag.FromErr(err)
+	}
+
+	sshKeysBody, readerr := io.ReadAll(res.Body)
+	if readerr != nil {
+		return diag.FromErr(readerr)
+	}
+	log.Printf("[DEBUG] http response: %v", res)
+	log.Printf("[DEBUG] pipeline SSH keys response: %v", sshKeysBody)
+
+	var sshKeysResponse PipelineSSHKeysResponse
+	decodeerr := json.Unmarshal(sshKeysBody, &sshKeysResponse)
+	if decodeerr != nil {
+		return diag.FromErr(decodeerr)
+	}
+
+	d.SetId(fmt.Sprintf("%s/%s/pipelines/ssh/keys", workspace, repoSlug))
+	flattenPipelineSSHKeys(&sshKeysResponse, d)
+	return nil
+}
+
+// PipelineSSHKeysResponse represents the response from the pipeline SSH keys API
+type PipelineSSHKeysResponse struct {
+	Values []PipelineSSHKey `json:"values"`
+	Page   int              `json:"page"`
+	Size   int              `json:"size"`
+	Next   string           `json:"next"`
+}
+
+// PipelineSSHKey represents a pipeline SSH key
+type PipelineSSHKey struct {
+	UUID      string                 `json:"uuid"`
+	Label     string                 `json:"label"`
+	Key       string                 `json:"key"`
+	Comment   string                 `json:"comment"`
+	CreatedOn string                 `json:"created_on"`
+	UpdatedOn string                 `json:"updated_on"`
+	Links     map[string]interface{} `json:"links"`
+}
+
+// Flattens the pipeline SSH keys information
+func flattenPipelineSSHKeys(c *PipelineSSHKeysResponse, d *schema.ResourceData) {
+	if c == nil {
+		return
+	}
+
+	sshKeys := make([]interface{}, len(c.Values))
+	for i, sshKey := range c.Values {
+		sshKeys[i] = map[string]interface{}{
+			"uuid":       sshKey.UUID,
+			"label":      sshKey.Label,
+			"key":        sshKey.Key,
+			"comment":    sshKey.Comment,
+			"created_on": sshKey.CreatedOn,
+			"updated_on": sshKey.UpdatedOn,
+			"links":      sshKey.Links,
+		}
+	}
+
+	d.Set("ssh_keys", sshKeys)
+}

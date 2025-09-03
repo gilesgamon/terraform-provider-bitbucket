@@ -24,22 +24,16 @@ func dataCommitDiffstat() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"commit_sha": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Commit SHA to retrieve diff statistics for",
-			},
-			"path": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to filter diff statistics by",
+			"commit": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"diffstat": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": {
+						"new_path": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -47,12 +41,16 @@ func dataCommitDiffstat() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"new_path": {
-							Type:     schema.TypeString,
+						"new_file": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"status": {
-							Type:     schema.TypeString,
+						"renamed_file": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"deleted_file": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 						"lines_added": {
@@ -63,38 +61,15 @@ func dataCommitDiffstat() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"lines_changed": {
-							Type:     schema.TypeInt,
+						"type": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"size": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"binary": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"renamed": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"deleted": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"new_file": {
-							Type:     schema.TypeBool,
+						"status": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
-				},
-			},
-			"summary": {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
 				},
 			},
 		},
@@ -104,30 +79,11 @@ func dataCommitDiffstat() *schema.Resource {
 func dataCommitDiffstatRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workspace := d.Get("workspace").(string)
 	repoSlug := d.Get("repo_slug").(string)
-	commitSha := d.Get("commit_sha").(string)
+	commit := d.Get("commit").(string)
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataCommitDiffstatRead", dumpResourceData(d, dataCommitDiffstat().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/diffstat/%s", workspace, repoSlug, commitSha)
-
-	// Build query parameters
-	params := make(map[string]string)
-	if path, ok := d.GetOk("path"); ok {
-		params["path"] = path.(string)
-	}
-
-	// Add query parameters to URL
-	if len(params) > 0 {
-		url += "?"
-		first := true
-		for key, value := range params {
-			if !first {
-				url += "&"
-			}
-			url += fmt.Sprintf("%s=%s", key, value)
-			first = false
-		}
-	}
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/diffstat", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -139,7 +95,7 @@ func dataCommitDiffstatRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate commit %s in repository %s/%s", commitSha, workspace, repoSlug)
+		return diag.Errorf("unable to locate commit %s in repository %s/%s", commit, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
@@ -163,34 +119,30 @@ func dataCommitDiffstatRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s/diffstat", workspace, repoSlug, commitSha))
+	d.SetId(fmt.Sprintf("%s/%s/commits/%s/diffstat", workspace, repoSlug, commit))
 	flattenCommitDiffstat(&diffstatResponse, d)
 	return nil
 }
 
 // CommitDiffstatResponse represents the response from the commit diffstat API
 type CommitDiffstatResponse struct {
-	Values []DiffstatFile `json:"values"`
-	Page   int            `json:"page"`
-	Size   int            `json:"size"`
-	Next   string         `json:"next"`
+	Values []CommitDiffstat `json:"values"`
+	Page   int              `json:"page"`
+	Size   int              `json:"size"`
+	Next   string           `json:"next"`
 }
 
-// DiffstatFile represents a file in the commit diffstat
-type DiffstatFile struct {
-	Type        string                 `json:"type"`
-	OldPath     string                 `json:"old_path"`
-	NewPath     string                 `json:"new_path"`
-	Status      string                 `json:"status"`
-	LinesAdded  int                    `json:"lines_added"`
-	LinesRemoved int                    `json:"lines_removed"`
-	LinesChanged int                    `json:"lines_changed"`
-	Size        int                    `json:"size"`
-	Binary      bool                   `json:"binary"`
-	Renamed     bool                   `json:"renamed"`
-	Deleted     bool                   `json:"deleted"`
-	NewFile     bool                   `json:"new_file"`
-	Links       map[string]interface{} `json:"links"`
+// CommitDiffstat represents diff statistics for a file in a commit
+type CommitDiffstat struct {
+	NewPath      string `json:"new_path"`
+	OldPath      string `json:"old_path"`
+	NewFile      bool   `json:"new_file"`
+	RenamedFile  bool   `json:"renamed_file"`
+	DeletedFile  bool   `json:"deleted_file"`
+	LinesAdded   int    `json:"lines_added"`
+	LinesRemoved int    `json:"lines_removed"`
+	Type         string `json:"type"`
+	Status       string `json:"status"`
 }
 
 // Flattens the commit diffstat information
@@ -200,40 +152,19 @@ func flattenCommitDiffstat(c *CommitDiffstatResponse, d *schema.ResourceData) {
 	}
 
 	diffstat := make([]interface{}, len(c.Values))
-	totalAdded := 0
-	totalRemoved := 0
-	totalChanged := 0
-
-	for i, file := range c.Values {
+	for i, stat := range c.Values {
 		diffstat[i] = map[string]interface{}{
-			"type":         file.Type,
-			"old_path":     file.OldPath,
-			"new_path":     file.NewPath,
-			"status":       file.Status,
-			"lines_added":  file.LinesAdded,
-			"lines_removed": file.LinesRemoved,
-			"lines_changed": file.LinesChanged,
-			"size":         file.Size,
-			"binary":       file.Binary,
-			"renamed":      file.Renamed,
-			"deleted":      file.Deleted,
-			"new_file":     file.NewFile,
+			"new_path":      stat.NewPath,
+			"old_path":      stat.OldPath,
+			"new_file":      stat.NewFile,
+			"renamed_file":  stat.RenamedFile,
+			"deleted_file":  stat.DeletedFile,
+			"lines_added":   stat.LinesAdded,
+			"lines_removed": stat.LinesRemoved,
+			"type":          stat.Type,
+			"status":        stat.Status,
 		}
-
-		totalAdded += file.LinesAdded
-		totalRemoved += file.LinesRemoved
-		totalChanged += file.LinesChanged
-	}
-
-	// Set summary statistics
-	summary := map[string]interface{}{
-		"total_files":    len(c.Values),
-		"total_added":    totalAdded,
-		"total_removed":  totalRemoved,
-		"total_changed":  totalChanged,
-		"total_modified": totalAdded + totalRemoved,
 	}
 
 	d.Set("diffstat", diffstat)
-	d.Set("summary", summary)
 }

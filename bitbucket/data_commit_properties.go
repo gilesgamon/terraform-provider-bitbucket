@@ -24,15 +24,9 @@ func dataCommitProperties() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"commit_sha": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Commit SHA to retrieve properties for",
-			},
-			"app_key": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Application key for the properties",
+			"commit": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"properties": {
 				Type:     schema.TypeList,
@@ -47,18 +41,6 @@ func dataCommitProperties() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"app_key": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"created_on": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"updated_on": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -69,17 +51,11 @@ func dataCommitProperties() *schema.Resource {
 func dataCommitPropertiesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workspace := d.Get("workspace").(string)
 	repoSlug := d.Get("repo_slug").(string)
-	commitSha := d.Get("commit_sha").(string)
-	appKey := d.Get("app_key").(string)
+	commit := d.Get("commit").(string)
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataCommitPropertiesRead", dumpResourceData(d, dataCommitProperties().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/commit/%s/properties/%s",
-		workspace,
-		repoSlug,
-		commitSha,
-		appKey,
-	)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/properties", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -91,7 +67,7 @@ func dataCommitPropertiesRead(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate commit properties for %s in repository %s/%s", appKey, workspace, repoSlug)
+		return diag.Errorf("unable to locate commit %s in repository %s/%s", commit, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
@@ -115,7 +91,7 @@ func dataCommitPropertiesRead(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s/properties/%s", workspace, repoSlug, commitSha, appKey))
+	d.SetId(fmt.Sprintf("%s/%s/commits/%s/properties", workspace, repoSlug, commit))
 	flattenCommitProperties(&propertiesResponse, d)
 	return nil
 }
@@ -128,14 +104,10 @@ type CommitPropertiesResponse struct {
 	Next   string           `json:"next"`
 }
 
-// CommitProperty represents a property attached to a commit
+// CommitProperty represents a commit property
 type CommitProperty struct {
-	Key       string                 `json:"key"`
-	Value     string                 `json:"value"`
-	AppKey    string                 `json:"app_key"`
-	CreatedOn string                 `json:"created_on"`
-	UpdatedOn string                 `json:"updated_on"`
-	Links     map[string]interface{} `json:"links"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // Flattens the commit properties information
@@ -147,11 +119,8 @@ func flattenCommitProperties(c *CommitPropertiesResponse, d *schema.ResourceData
 	properties := make([]interface{}, len(c.Values))
 	for i, prop := range c.Values {
 		properties[i] = map[string]interface{}{
-			"key":        prop.Key,
-			"value":      prop.Value,
-			"app_key":    prop.AppKey,
-			"created_on": prop.CreatedOn,
-			"updated_on": prop.UpdatedOn,
+			"key":   prop.Key,
+			"value": prop.Value,
 		}
 	}
 

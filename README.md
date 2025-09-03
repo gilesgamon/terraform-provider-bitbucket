@@ -1,8 +1,8 @@
 # Bitbucket Terraform Provider
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/DrFaust92/bitbucket)](https://goreportcard.com/report/github.com/DrFaust92/bitbucket)
-[![GoDoc](https://godoc.org/github.com/DrFaust92/bitbucket?status.svg)](https://godoc.org/github.com/DrFaust92/bitbucket)
-[![License](https://img.shields.io/github/license/DrFaust92/bitbucket.svg)](https://github.com/DrFaust92/bitbucket/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gilesgamon/terraform-provider-bitbucket)](https://goreportcard.com/report/github.com/gilesgamon/terraform-provider-bitbucket)
+[![GoDoc](https://godoc.org/github.com/gilesgamon/terraform-provider-bitbucket?status.svg)](https://godoc.org/github.com/gilesgamon/terraform-provider-bitbucket)
+[![License](https://img.shields.io/github/license/gilesgamon/terraform-provider-bitbucket.svg)](https://github.com/gilesgamon/terraform-provider-bitbucket/blob/master/LICENSE)
 
 The Bitbucket Terraform Provider enables you to manage your Bitbucket Cloud resources using Terraform. This provider offers comprehensive coverage of Bitbucket's API, including repositories, pipelines, issues, and advanced Git operations.
 
@@ -45,8 +45,8 @@ The Bitbucket Terraform Provider enables you to manage your Bitbucket Cloud reso
 terraform {
   required_providers {
     bitbucket = {
-      source  = "DrFaust92/bitbucket"
-      version = "~> 2.45.1"
+      source  = "gilesgamon/terraform-provider-bitbucket"
+      version = "0.0.1"
     }
   }
 }
@@ -55,7 +55,7 @@ terraform {
 ### Building from Source
 
 ```bash
-git clone https://github.com/DrFaust92/bitbucket.git
+git clone https://github.com/gilesgamon/terraform-provider-bitbucket.git
 cd bitbucket
 go build -o terraform-provider-bitbucket .
 ```
@@ -292,10 +292,10 @@ resource "bitbucket_repository" "infrastructure" {
   workspace = "myworkspace"
   name     = "terraform-infrastructure"
   project_key = "INFRA"
-  
+
   is_private = true
   fork_policy = "allow_forks"
-  
+
   description = "Infrastructure as Code repository"
 }
 ```
@@ -307,7 +307,7 @@ resource "bitbucket_project" "infrastructure" {
   workspace = "myworkspace"
   name     = "Infrastructure"
   key      = "INFRA"
-  
+
   description = "Infrastructure and DevOps projects"
   is_private = true
 }
@@ -403,7 +403,7 @@ go test -v -timeout 120m ./...
 
 ## 📖 Documentation
 
-For detailed documentation on each data source and resource, see the [Terraform Registry](https://registry.terraform.io/providers/DrFaust92/bitbucket/latest/docs).
+For detailed documentation on each data source and resource, see the [Terraform Registry](https://registry.terraform.io/providers/gilesgamon/terraform-provider-bitbucket/latest/docs).
 
 ## 🤝 Contributing
 
@@ -424,9 +424,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Issues**: [GitHub Issues](https://github.com/DrFaust92/bitbucket/issues)
-- **Documentation**: [Terraform Registry](https://registry.terraform.io/providers/DrFaust92/bitbucket/latest/docs)
-- **Discussions**: [GitHub Discussions](https://github.com/DrFaust92/bitbucket/discussions)
+- **Issues**: [GitHub Issues](https://github.com/gilesgamon/terraform-provider-bitbucket/issues)
+- **Documentation**: [Terraform Registry](https://registry.terraform.io/providers/gilesgamon/bitbucket/latest/docs)
+- **Discussions**: [GitHub Discussions](https://github.com/gilesgamon/terraform-provider-bitbucket/discussions)
 
 ## 🔗 Related Links
 

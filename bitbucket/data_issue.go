@@ -25,9 +25,8 @@ func dataIssue() *schema.Resource {
 				Required: true,
 			},
 			"issue_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Issue ID to retrieve",
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"id": {
 				Type:     schema.TypeInt,
@@ -38,8 +37,11 @@ func dataIssue() *schema.Resource {
 				Computed: true,
 			},
 			"content": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeMap,
 				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"state": {
 				Type:     schema.TypeString,
@@ -54,24 +56,18 @@ func dataIssue() *schema.Resource {
 				Computed: true,
 			},
 			"assignee": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeMap,
 				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"reporter": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeMap,
 				Computed: true,
-			},
-			"milestone": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"component": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"version": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"created_on": {
 				Type:     schema.TypeString,
@@ -79,14 +75,6 @@ func dataIssue() *schema.Resource {
 			},
 			"updated_on": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"votes": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"watches": {
-				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"links": {
@@ -148,46 +136,36 @@ func dataIssueRead(ctx context.Context, d *schema.ResourceData, m interface{}) d
 	return nil
 }
 
-// IssueDetail represents a single issue from the API
+// IssueDetail represents a single issue
 type IssueDetail struct {
-	ID          int                    `json:"id"`
-	Title       string                 `json:"title"`
-	Content     string                 `json:"content"`
-	State       string                 `json:"state"`
-	Kind        string                 `json:"kind"`
-	Priority    string                 `json:"priority"`
-	Assignee    string                 `json:"assignee"`
-	Reporter    string                 `json:"reporter"`
-	Milestone   string                 `json:"milestone"`
-	Component   string                 `json:"component"`
-	Version     string                 `json:"version"`
-	CreatedOn   string                 `json:"created_on"`
-	UpdatedOn   string                 `json:"updated_on"`
-	Votes       int                    `json:"votes"`
-	Watches     int                    `json:"watches"`
-	Links       map[string]interface{} `json:"links"`
+	ID        int                    `json:"id"`
+	Title     string                 `json:"title"`
+	Content   map[string]interface{} `json:"content"`
+	State     string                 `json:"state"`
+	Kind      string                 `json:"kind"`
+	Priority  string                 `json:"priority"`
+	Assignee  map[string]interface{} `json:"assignee"`
+	Reporter  map[string]interface{} `json:"reporter"`
+	CreatedOn string                 `json:"created_on"`
+	UpdatedOn string                 `json:"updated_on"`
+	Links     map[string]interface{} `json:"links"`
 }
 
 // Flattens the issue information
-func flattenIssue(i *IssueDetail, d *schema.ResourceData) {
-	if i == nil {
+func flattenIssue(c *IssueDetail, d *schema.ResourceData) {
+	if c == nil {
 		return
 	}
 
-	d.Set("id", i.ID)
-	d.Set("title", i.Title)
-	d.Set("content", i.Content)
-	d.Set("state", i.State)
-	d.Set("kind", i.Kind)
-	d.Set("priority", i.Priority)
-	d.Set("assignee", i.Assignee)
-	d.Set("reporter", i.Reporter)
-	d.Set("milestone", i.Milestone)
-	d.Set("component", i.Component)
-	d.Set("version", i.Version)
-	d.Set("created_on", i.CreatedOn)
-	d.Set("updated_on", i.UpdatedOn)
-	d.Set("votes", i.Votes)
-	d.Set("watches", i.Watches)
-	d.Set("links", i.Links)
+	d.Set("id", c.ID)
+	d.Set("title", c.Title)
+	d.Set("content", c.Content)
+	d.Set("state", c.State)
+	d.Set("kind", c.Kind)
+	d.Set("priority", c.Priority)
+	d.Set("assignee", c.Assignee)
+	d.Set("reporter", c.Reporter)
+	d.Set("created_on", c.CreatedOn)
+	d.Set("updated_on", c.UpdatedOn)
+	d.Set("links", c.Links)
 }

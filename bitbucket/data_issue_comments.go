@@ -25,9 +25,8 @@ func dataIssueComments() *schema.Resource {
 				Required: true,
 			},
 			"issue_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Issue ID to retrieve comments for",
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"comments": {
 				Type:     schema.TypeList,
@@ -39,12 +38,18 @@ func dataIssueComments() *schema.Resource {
 							Computed: true,
 						},
 						"content": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
-						"author": {
-							Type:     schema.TypeString,
+						"user": {
+							Type:     schema.TypeMap,
 							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"created_on": {
 							Type:     schema.TypeString,
@@ -53,13 +58,6 @@ func dataIssueComments() *schema.Resource {
 						"updated_on": {
 							Type:     schema.TypeString,
 							Computed: true,
-						},
-						"user": {
-							Type:     schema.TypeMap,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 						"links": {
 							Type:     schema.TypeMap,
@@ -82,11 +80,7 @@ func dataIssueCommentsRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataIssueCommentsRead", dumpResourceData(d, dataIssueComments().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/issues/%s/comments",
-		workspace,
-		repoSlug,
-		issueID,
-	)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/issues/%s/comments", workspace, repoSlug, issueID)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -138,11 +132,10 @@ type IssueCommentsResponse struct {
 // IssueComment represents a comment on an issue
 type IssueComment struct {
 	ID        int                    `json:"id"`
-	Content   string                 `json:"content"`
-	Author    string                 `json:"author"`
+	Content   map[string]interface{} `json:"content"`
+	User      map[string]interface{} `json:"user"`
 	CreatedOn string                 `json:"created_on"`
 	UpdatedOn string                 `json:"updated_on"`
-	User      map[string]interface{} `json:"user"`
 	Links     map[string]interface{} `json:"links"`
 }
 
@@ -155,13 +148,12 @@ func flattenIssueComments(c *IssueCommentsResponse, d *schema.ResourceData) {
 	comments := make([]interface{}, len(c.Values))
 	for i, comment := range c.Values {
 		comments[i] = map[string]interface{}{
-			"id":          comment.ID,
-			"content":     comment.Content,
-			"author":      comment.Author,
-			"created_on":  comment.CreatedOn,
-			"updated_on":  comment.UpdatedOn,
-			"user":        comment.User,
-			"links":       comment.Links,
+			"id":         comment.ID,
+			"content":    comment.Content,
+			"user":       comment.User,
+			"created_on": comment.CreatedOn,
+			"updated_on": comment.UpdatedOn,
+			"links":      comment.Links,
 		}
 	}
 

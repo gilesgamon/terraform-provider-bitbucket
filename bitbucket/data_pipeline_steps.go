@@ -25,9 +25,8 @@ func dataPipelineSteps() *schema.Resource {
 				Required: true,
 			},
 			"pipeline_uuid": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Pipeline UUID to retrieve steps for",
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"steps": {
 				Type:     schema.TypeList,
@@ -47,11 +46,8 @@ func dataPipelineSteps() *schema.Resource {
 							Computed: true,
 						},
 						"state": {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 						"started_on": {
 							Type:     schema.TypeString,
@@ -65,53 +61,22 @@ func dataPipelineSteps() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"build_seconds_used": {
+						"max_time": {
 							Type:     schema.TypeInt,
 							Computed: true,
-						},
-						"max_seconds": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"image": {
-							Type:     schema.TypeMap,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 						"script": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-						"environment": {
 							Type:     schema.TypeMap,
 							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"artifacts": {
-							Type:     schema.TypeList,
+						"links": {
+							Type:     schema.TypeMap,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"name": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"path": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"size": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-								},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
 					},
@@ -128,11 +93,7 @@ func dataPipelineStepsRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataPipelineStepsRead", dumpResourceData(d, dataPipelineSteps().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/pipelines/%s/steps",
-		workspace,
-		repoSlug,
-		pipelineUUID,
-	)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/pipelines/%s/steps", workspace, repoSlug, pipelineUUID)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -181,28 +142,18 @@ type PipelineStepsResponse struct {
 	Next   string         `json:"next"`
 }
 
-// PipelineStep represents a step in a pipeline
+// PipelineStep represents a pipeline step
 type PipelineStep struct {
 	UUID                string                 `json:"uuid"`
 	Name                string                 `json:"name"`
 	Type                string                 `json:"type"`
-	State               map[string]interface{} `json:"state"`
+	State               string                 `json:"state"`
 	StartedOn           string                 `json:"started_on"`
 	CompletedOn         string                 `json:"completed_on"`
 	DurationInSeconds   int                    `json:"duration_in_seconds"`
-	BuildSecondsUsed    int                    `json:"build_seconds_used"`
-	MaxSeconds          int                    `json:"max_seconds"`
-	Image               map[string]interface{} `json:"image"`
-	Script              []string               `json:"script"`
-	Environment         map[string]interface{} `json:"environment"`
-	Artifacts           []PipelineArtifact     `json:"artifacts"`
-}
-
-// PipelineArtifact represents an artifact produced by a pipeline step
-type PipelineArtifact struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
-	Size int    `json:"size"`
+	MaxTime             int                    `json:"max_time"`
+	Script              map[string]interface{} `json:"script"`
+	Links               map[string]interface{} `json:"links"`
 }
 
 // Flattens the pipeline steps information
@@ -213,15 +164,6 @@ func flattenPipelineSteps(c *PipelineStepsResponse, d *schema.ResourceData) {
 
 	steps := make([]interface{}, len(c.Values))
 	for i, step := range c.Values {
-		artifacts := make([]interface{}, len(step.Artifacts))
-		for j, artifact := range step.Artifacts {
-			artifacts[j] = map[string]interface{}{
-				"name": artifact.Name,
-				"path": artifact.Path,
-				"size": artifact.Size,
-			}
-		}
-
 		steps[i] = map[string]interface{}{
 			"uuid":                  step.UUID,
 			"name":                  step.Name,
@@ -230,12 +172,9 @@ func flattenPipelineSteps(c *PipelineStepsResponse, d *schema.ResourceData) {
 			"started_on":            step.StartedOn,
 			"completed_on":          step.CompletedOn,
 			"duration_in_seconds":   step.DurationInSeconds,
-			"build_seconds_used":    step.BuildSecondsUsed,
-			"max_seconds":           step.MaxSeconds,
-			"image":                 step.Image,
+			"max_time":              step.MaxTime,
 			"script":                step.Script,
-			"environment":           step.Environment,
-			"artifacts":             artifacts,
+			"links":                 step.Links,
 		}
 	}
 

@@ -24,17 +24,16 @@ func dataCommitReports() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"commit_sha": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Commit SHA to retrieve reports for",
+			"commit": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"reports": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"report_id": {
+						"uuid": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -46,7 +45,7 @@ func dataCommitReports() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"report_type": {
+						"external_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -62,6 +61,14 @@ func dataCommitReports() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"link": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"created_on": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -70,32 +77,11 @@ func dataCommitReports() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"annotations": {
-							Type:     schema.TypeList,
+						"data": {
+							Type:     schema.TypeMap,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"annotation_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"path": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"line": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"message": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"severity": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
 					},
@@ -108,15 +94,11 @@ func dataCommitReports() *schema.Resource {
 func dataCommitReportsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workspace := d.Get("workspace").(string)
 	repoSlug := d.Get("repo_slug").(string)
-	commitSha := d.Get("commit_sha").(string)
+	commit := d.Get("commit").(string)
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataCommitReportsRead", dumpResourceData(d, dataCommitReports().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/commit/%s/reports",
-		workspace,
-		repoSlug,
-		commitSha,
-	)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/reports", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -128,7 +110,7 @@ func dataCommitReportsRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate commit %s in repository %s/%s", commitSha, workspace, repoSlug)
+		return diag.Errorf("unable to locate commit %s in repository %s/%s", commit, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
@@ -152,7 +134,7 @@ func dataCommitReportsRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s/reports", workspace, repoSlug, commitSha))
+	d.SetId(fmt.Sprintf("%s/%s/commits/%s/reports", workspace, repoSlug, commit))
 	flattenCommitReports(&reportsResponse, d)
 	return nil
 }
@@ -165,18 +147,20 @@ type CommitReportsResponse struct {
 	Next   string         `json:"next"`
 }
 
-// CommitReport represents a report for a commit
+// CommitReport represents a commit report (code quality, security)
 type CommitReport struct {
-	ReportID   string                 `json:"report_id"`
+	UUID       string                 `json:"uuid"`
 	Title      string                 `json:"title"`
 	Details    string                 `json:"details"`
-	ReportType string                 `json:"report_type"`
+	ExternalID string                 `json:"external_id"`
 	Reporter   string                 `json:"reporter"`
 	Result     string                 `json:"result"`
 	Severity   string                 `json:"severity"`
+	Type       string                 `json:"type"`
+	Link       string                 `json:"link"`
 	CreatedOn  string                 `json:"created_on"`
 	UpdatedOn  string                 `json:"updated_on"`
-	Links      map[string]interface{} `json:"links"`
+	Data       map[string]interface{} `json:"data"`
 }
 
 // Flattens the commit reports information
@@ -188,15 +172,18 @@ func flattenCommitReports(c *CommitReportsResponse, d *schema.ResourceData) {
 	reports := make([]interface{}, len(c.Values))
 	for i, report := range c.Values {
 		reports[i] = map[string]interface{}{
-			"report_id":   report.ReportID,
+			"uuid":        report.UUID,
 			"title":       report.Title,
 			"details":     report.Details,
-			"report_type": report.ReportType,
+			"external_id": report.ExternalID,
 			"reporter":    report.Reporter,
 			"result":      report.Result,
 			"severity":    report.Severity,
+			"type":        report.Type,
+			"link":        report.Link,
 			"created_on":  report.CreatedOn,
 			"updated_on":  report.UpdatedOn,
+			"data":        report.Data,
 		}
 	}
 

@@ -24,31 +24,24 @@ func dataCommitDiff() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"commit_sha": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Commit SHA to retrieve diff for",
-			},
-			"context": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "Number of context lines to show around changes",
-			},
-			"path": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path to filter diff by",
+			"commit": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"diff": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"new_file": {
-							Type:     schema.TypeBool,
+						"new_path": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"deleted_file": {
+						"old_path": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"new_file": {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
@@ -56,12 +49,24 @@ func dataCommitDiff() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"old_path": {
+						"deleted_file": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"similarity": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"status": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"new_path": {
-							Type:     schema.TypeString,
+						"lines_added": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"lines_removed": {
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"hunks": {
@@ -85,41 +90,11 @@ func dataCommitDiff() *schema.Resource {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
-									"context": {
+									"content": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"segments": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"type": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"lines": {
-													Type:     schema.TypeList,
-													Computed: true,
-													Elem: &schema.Schema{
-														Type: schema.TypeString,
-													},
-												},
-												"truncated": {
-													Type:     schema.TypeBool,
-													Computed: true,
-												},
-											},
-										},
-									},
 								},
-							},
-						},
-						"stats": {
-							Type:     schema.TypeMap,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeInt,
 							},
 						},
 					},
@@ -132,33 +107,11 @@ func dataCommitDiff() *schema.Resource {
 func dataCommitDiffRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workspace := d.Get("workspace").(string)
 	repoSlug := d.Get("repo_slug").(string)
-	commitSha := d.Get("commit_sha").(string)
+	commit := d.Get("commit").(string)
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataCommitDiffRead", dumpResourceData(d, dataCommitDiff().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/diff/%s", workspace, repoSlug, commitSha)
-
-	// Build query parameters
-	params := make(map[string]string)
-	if context, ok := d.GetOk("context"); ok {
-		params["context"] = fmt.Sprintf("%d", context.(int))
-	}
-	if path, ok := d.GetOk("path"); ok {
-		params["path"] = path.(string)
-	}
-
-	// Add query parameters to URL
-	if len(params) > 0 {
-		url += "?"
-		first := true
-		for key, value := range params {
-			if !first {
-				url += "&"
-			}
-			url += fmt.Sprintf("%s=%s", key, value)
-			first = false
-		}
-	}
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/diff", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -170,7 +123,7 @@ func dataCommitDiffRead(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate commit %s in repository %s/%s", commitSha, workspace, repoSlug)
+		return diag.Errorf("unable to locate commit %s in repository %s/%s", commit, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
@@ -194,46 +147,40 @@ func dataCommitDiffRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s/diff", workspace, repoSlug, commitSha))
+	d.SetId(fmt.Sprintf("%s/%s/commits/%s/diff", workspace, repoSlug, commit))
 	flattenCommitDiff(&diffResponse, d)
 	return nil
 }
 
 // CommitDiffResponse represents the response from the commit diff API
 type CommitDiffResponse struct {
-	Values []DiffFile `json:"values"`
-	Page   int        `json:"page"`
-	Size   int        `json:"size"`
-	Next   string     `json:"next"`
+	Values []CommitDiff `json:"values"`
+	Page   int          `json:"page"`
+	Size   int          `json:"size"`
+	Next   string       `json:"next"`
 }
 
-// DiffFile represents a file in the commit diff
-type DiffFile struct {
-	NewFile     bool       `json:"new_file"`
-	DeletedFile bool       `json:"deleted_file"`
-	RenamedFile bool       `json:"renamed_file"`
-	OldPath     string     `json:"old_path"`
-	NewPath     string     `json:"new_path"`
-	Hunks       []DiffHunk `json:"hunks"`
-	Stats       map[string]interface{} `json:"stats"`
-	Links       map[string]interface{} `json:"links"`
+// CommitDiff represents a file diff in a commit
+type CommitDiff struct {
+	NewPath      string       `json:"new_path"`
+	OldPath      string       `json:"old_path"`
+	NewFile      bool         `json:"new_file"`
+	RenamedFile  bool         `json:"renamed_file"`
+	DeletedFile  bool         `json:"deleted_file"`
+	Similarity   int          `json:"similarity"`
+	Status       string       `json:"status"`
+	LinesAdded   int          `json:"lines_added"`
+	LinesRemoved int          `json:"lines_removed"`
+	Hunks        []DiffHunk   `json:"hunks"`
 }
 
-// DiffHunk represents a hunk of changes in a file
+// DiffHunk represents a hunk of changes in a diff
 type DiffHunk struct {
 	OldStart int    `json:"old_start"`
 	OldLines int    `json:"old_lines"`
 	NewStart int    `json:"new_start"`
 	NewLines int    `json:"new_lines"`
-	Context  string `json:"context"`
-	Segments []DiffSegment `json:"segments"`
-}
-
-// DiffSegment represents a segment of lines in a diff hunk
-type DiffSegment struct {
-	Type      string   `json:"type"`
-	Lines     []string `json:"lines"`
-	Truncated bool     `json:"truncated"`
+	Content  string `json:"content"`
 }
 
 // Flattens the commit diff information
@@ -243,35 +190,29 @@ func flattenCommitDiff(c *CommitDiffResponse, d *schema.ResourceData) {
 	}
 
 	diff := make([]interface{}, len(c.Values))
-	for i, file := range c.Values {
-		hunks := make([]interface{}, len(file.Hunks))
-		for j, hunk := range file.Hunks {
-			segments := make([]interface{}, len(hunk.Segments))
-			for k, segment := range hunk.Segments {
-				segments[k] = map[string]interface{}{
-					"type":      segment.Type,
-					"lines":     segment.Lines,
-					"truncated": segment.Truncated,
-				}
-			}
+	for i, fileDiff := range c.Values {
+		hunks := make([]interface{}, len(fileDiff.Hunks))
+		for j, hunk := range fileDiff.Hunks {
 			hunks[j] = map[string]interface{}{
 				"old_start": hunk.OldStart,
 				"old_lines": hunk.OldLines,
 				"new_start": hunk.NewStart,
 				"new_lines": hunk.NewLines,
-				"context":   hunk.Context,
-				"segments":  segments,
+				"content":   hunk.Content,
 			}
 		}
 
 		diff[i] = map[string]interface{}{
-			"new_file":     file.NewFile,
-			"deleted_file": file.DeletedFile,
-			"renamed_file": file.RenamedFile,
-			"old_path":     file.OldPath,
-			"new_path":     file.NewPath,
-			"hunks":        hunks,
-			"stats":        file.Stats,
+			"new_path":      fileDiff.NewPath,
+			"old_path":      fileDiff.OldPath,
+			"new_file":      fileDiff.NewFile,
+			"renamed_file":  fileDiff.RenamedFile,
+			"deleted_file":  fileDiff.DeletedFile,
+			"similarity":    fileDiff.Similarity,
+			"status":        fileDiff.Status,
+			"lines_added":   fileDiff.LinesAdded,
+			"lines_removed": fileDiff.LinesRemoved,
+			"hunks":         hunks,
 		}
 	}
 

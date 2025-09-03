@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/DrFaust92/bitbucket-go-client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -25,10 +24,9 @@ func dataCommitComments() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"commit_sha": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Commit SHA to retrieve comments for",
+			"commit": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"comments": {
 				Type:     schema.TypeList,
@@ -36,12 +34,15 @@ func dataCommitComments() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"content": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"created_on": {
 							Type:     schema.TypeString,
@@ -51,48 +52,18 @@ func dataCommitComments() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"author": {
-							Type:     schema.TypeList,
+						"user": {
+							Type:     schema.TypeMap,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"username": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"display_name": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"uuid": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
-						"type": {
-							Type:     schema.TypeString,
+						"links": {
+							Type:     schema.TypeMap,
 							Computed: true,
-						},
-						"inline": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"from": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"to": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"path": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
 					},
@@ -105,15 +76,11 @@ func dataCommitComments() *schema.Resource {
 func dataCommitCommentsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workspace := d.Get("workspace").(string)
 	repoSlug := d.Get("repo_slug").(string)
-	commitSha := d.Get("commit_sha").(string)
+	commit := d.Get("commit").(string)
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataCommitCommentsRead", dumpResourceData(d, dataCommitComments().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/commit/%s/comments",
-		workspace,
-		repoSlug,
-		commitSha,
-	)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/comments", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -125,7 +92,7 @@ func dataCommitCommentsRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate commit %s in repository %s/%s", commitSha, workspace, repoSlug)
+		return diag.Errorf("unable to locate commit %s in repository %s/%s", commit, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
@@ -149,7 +116,7 @@ func dataCommitCommentsRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s/comments", workspace, repoSlug, commitSha))
+	d.SetId(fmt.Sprintf("%s/%s/commits/%s/comments", workspace, repoSlug, commit))
 	flattenCommitComments(&commentsResponse, d)
 	return nil
 }
@@ -162,23 +129,14 @@ type CommitCommentsResponse struct {
 	Next   string          `json:"next"`
 }
 
-// CommitComment represents a comment on a commit
+// CommitComment represents a commit comment
 type CommitComment struct {
-	ID        string                 `json:"id"`
-	Content   string                 `json:"content"`
+	ID        int                    `json:"id"`
+	Content   map[string]interface{} `json:"content"`
 	CreatedOn string                 `json:"created_on"`
 	UpdatedOn string                 `json:"updated_on"`
-	Author    *bitbucket.Account     `json:"author"`
-	Type      string                 `json:"type"`
-	Inline    *CommentInline         `json:"inline,omitempty"`
+	User      map[string]interface{} `json:"user"`
 	Links     map[string]interface{} `json:"links"`
-}
-
-// CommentInline represents inline comment information
-type CommentInline struct {
-	From int    `json:"from"`
-	To   int    `json:"to"`
-	Path string `json:"path"`
 }
 
 // Flattens the commit comments information
@@ -190,29 +148,14 @@ func flattenCommitComments(c *CommitCommentsResponse, d *schema.ResourceData) {
 	comments := make([]interface{}, len(c.Values))
 	for i, comment := range c.Values {
 		comments[i] = map[string]interface{}{
-			"id":          comment.ID,
-			"content":     comment.Content,
-			"created_on":  comment.CreatedOn,
-			"updated_on":  comment.UpdatedOn,
-			"type":        comment.Type,
-			"author":      flattenAccount(comment.Author),
-			"inline":      flattenCommentInline(comment.Inline),
+			"id":         comment.ID,
+			"content":    comment.Content,
+			"created_on": comment.CreatedOn,
+			"updated_on": comment.UpdatedOn,
+			"user":       comment.User,
+			"links":      comment.Links,
 		}
 	}
 
 	d.Set("comments", comments)
-}
-
-// Flattens the comment inline information
-func flattenCommentInline(inline *CommentInline) []interface{} {
-	if inline == nil {
-		return nil
-	}
-	return []interface{}{
-		map[string]interface{}{
-			"from": inline.From,
-			"to":   inline.To,
-			"path": inline.Path,
-		},
-	}
 }

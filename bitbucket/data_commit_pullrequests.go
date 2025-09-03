@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataCommitPullRequests() *schema.Resource {
+func dataCommitPullrequests() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataCommitPullRequestsRead,
+		ReadContext: dataCommitPullrequestsRead,
 		Schema: map[string]*schema.Schema{
 			"workspace": {
 				Type:     schema.TypeString,
@@ -24,12 +24,11 @@ func dataCommitPullRequests() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"commit_sha": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Commit SHA to find pull requests for",
+			"commit": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"pull_requests": {
+			"pullrequests": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -51,8 +50,11 @@ func dataCommitPullRequests() *schema.Resource {
 							Computed: true,
 						},
 						"author": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"source": {
 							Type:     schema.TypeMap,
@@ -76,20 +78,12 @@ func dataCommitPullRequests() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"merge_commit": {
+						"links": {
 							Type:     schema.TypeMap,
 							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-						},
-						"closed_by": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"closed_on": {
-							Type:     schema.TypeString,
-							Computed: true,
 						},
 					},
 				},
@@ -98,18 +92,14 @@ func dataCommitPullRequests() *schema.Resource {
 	}
 }
 
-func dataCommitPullRequestsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataCommitPullrequestsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workspace := d.Get("workspace").(string)
 	repoSlug := d.Get("repo_slug").(string)
-	commitSha := d.Get("commit_sha").(string)
+	commit := d.Get("commit").(string)
 
-	log.Printf("[DEBUG]: params for %s: %v", "dataCommitPullRequestsRead", dumpResourceData(d, dataCommitPullRequests().Schema))
+	log.Printf("[DEBUG]: params for %s: %v", "dataCommitPullrequestsRead", dumpResourceData(d, dataCommitPullrequests().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/commit/%s/pullrequests",
-		workspace,
-		repoSlug,
-		commitSha,
-	)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/pullrequests", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -121,69 +111,66 @@ func dataCommitPullRequestsRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate commit %s in repository %s/%s", commitSha, workspace, repoSlug)
+		return diag.Errorf("unable to locate commit %s in repository %s/%s", commit, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
-		return diag.Errorf("error reading commit pull requests with params (%s): ", dumpResourceData(d, dataCommitPullRequests().Schema))
+		return diag.Errorf("error reading commit pull requests with params (%s): ", dumpResourceData(d, dataCommitPullrequests().Schema))
 	}
 
 	if err := handleClientError(res, err); err != nil {
 		return diag.FromErr(err)
 	}
 
-	pullRequestsBody, readerr := io.ReadAll(res.Body)
+	pullrequestsBody, readerr := io.ReadAll(res.Body)
 	if readerr != nil {
 		return diag.FromErr(readerr)
 	}
 	log.Printf("[DEBUG] http response: %v", res)
-	log.Printf("[DEBUG] commit pull requests response: %v", pullRequestsBody)
+	log.Printf("[DEBUG] commit pull requests response: %v", pullrequestsBody)
 
-	var pullRequestsResponse CommitPullRequestsResponse
-	decodeerr := json.Unmarshal(pullRequestsBody, &pullRequestsResponse)
+	var pullrequestsResponse CommitPullrequestsResponse
+	decodeerr := json.Unmarshal(pullrequestsBody, &pullrequestsResponse)
 	if decodeerr != nil {
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s/pullrequests", workspace, repoSlug, commitSha))
-	flattenCommitPullRequests(&pullRequestsResponse, d)
+	d.SetId(fmt.Sprintf("%s/%s/commits/%s/pullrequests", workspace, repoSlug, commit))
+	flattenCommitPullrequests(&pullrequestsResponse, d)
 	return nil
 }
 
-// CommitPullRequestsResponse represents the response from the commit pull requests API
-type CommitPullRequestsResponse struct {
-	Values []CommitPullRequest `json:"values"`
+// CommitPullrequestsResponse represents the response from the commit pull requests API
+type CommitPullrequestsResponse struct {
+	Values []CommitPullrequest `json:"values"`
 	Page   int                 `json:"page"`
 	Size   int                 `json:"size"`
 	Next   string              `json:"next"`
 }
 
-// CommitPullRequest represents a pull request containing a specific commit
-type CommitPullRequest struct {
+// CommitPullrequest represents a pull request containing a commit
+type CommitPullrequest struct {
 	ID          int                    `json:"id"`
 	Title       string                 `json:"title"`
 	Description string                 `json:"description"`
 	State       string                 `json:"state"`
-	Author      string                 `json:"author"`
+	Author      map[string]interface{} `json:"author"`
 	Source      map[string]interface{} `json:"source"`
 	Destination map[string]interface{} `json:"destination"`
 	CreatedOn   string                 `json:"created_on"`
 	UpdatedOn   string                 `json:"updated_on"`
-	MergeCommit map[string]interface{} `json:"merge_commit"`
-	ClosedBy    string                 `json:"closed_by"`
-	ClosedOn    string                 `json:"closed_on"`
 	Links       map[string]interface{} `json:"links"`
 }
 
 // Flattens the commit pull requests information
-func flattenCommitPullRequests(c *CommitPullRequestsResponse, d *schema.ResourceData) {
+func flattenCommitPullrequests(c *CommitPullrequestsResponse, d *schema.ResourceData) {
 	if c == nil {
 		return
 	}
 
-	pullRequests := make([]interface{}, len(c.Values))
+	pullrequests := make([]interface{}, len(c.Values))
 	for i, pr := range c.Values {
-		pullRequests[i] = map[string]interface{}{
+		pullrequests[i] = map[string]interface{}{
 			"id":           pr.ID,
 			"title":        pr.Title,
 			"description":  pr.Description,
@@ -193,11 +180,9 @@ func flattenCommitPullRequests(c *CommitPullRequestsResponse, d *schema.Resource
 			"destination":  pr.Destination,
 			"created_on":   pr.CreatedOn,
 			"updated_on":   pr.UpdatedOn,
-			"merge_commit": pr.MergeCommit,
-			"closed_by":    pr.ClosedBy,
-			"closed_on":    pr.ClosedOn,
+			"links":        pr.Links,
 		}
 	}
 
-	d.Set("pull_requests", pullRequests)
+	d.Set("pullrequests", pullrequests)
 }
