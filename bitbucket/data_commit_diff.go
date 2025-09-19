@@ -162,16 +162,16 @@ type CommitDiffResponse struct {
 
 // CommitDiff represents a file diff in a commit
 type CommitDiff struct {
-	NewPath      string       `json:"new_path"`
-	OldPath      string       `json:"old_path"`
-	NewFile      bool         `json:"new_file"`
-	RenamedFile  bool         `json:"renamed_file"`
-	DeletedFile  bool         `json:"deleted_file"`
-	Similarity   int          `json:"similarity"`
-	Status       string       `json:"status"`
-	LinesAdded   int          `json:"lines_added"`
-	LinesRemoved int          `json:"lines_removed"`
-	Hunks        []DiffHunk   `json:"hunks"`
+	NewPath      string     `json:"new_path"`
+	OldPath      string     `json:"old_path"`
+	NewFile      bool       `json:"new_file"`
+	RenamedFile  bool       `json:"renamed_file"`
+	DeletedFile  bool       `json:"deleted_file"`
+	Similarity   int        `json:"similarity"`
+	Status       string     `json:"status"`
+	LinesAdded   int        `json:"lines_added"`
+	LinesRemoved int        `json:"lines_removed"`
+	Hunks        []DiffHunk `json:"hunks"`
 }
 
 // DiffHunk represents a hunk of changes in a diff

@@ -179,12 +179,12 @@ type RepositoryPullRequestDiffResponse struct {
 type RepositoryPullRequestDiff struct {
 	New   map[string]interface{} `json:"new"`
 	Old   map[string]interface{} `json:"old"`
-	Hunks []PRDiffHunk             `json:"hunks"`
+	Hunks []PRDiffHunk           `json:"hunks"`
 }
 
 // PRDiffHunk represents a diff hunk for pull requests
 type PRDiffHunk struct {
-	Type  string      `json:"type"`
+	Type  string       `json:"type"`
 	Lines []PRDiffLine `json:"lines"`
 }
 

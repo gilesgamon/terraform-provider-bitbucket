@@ -289,12 +289,12 @@ func dataReadRepository(ctx context.Context, d *schema.ResourceData, m interface
 
 	d.SetId(repo.Uuid)
 	flattenRepository(&repo, d)
-	
+
 	// Fetch latest commit hash for additional hash information
 	if err := fetchLatestCommitHash(ctx, client, workspace, repoSlug, d); err != nil {
 		log.Printf("[WARN] Failed to fetch latest commit hash: %v", err)
 	}
-	
+
 	return nil
 }
 
@@ -305,40 +305,40 @@ func fetchLatestCommitHash(ctx context.Context, client Client, workspace, repoSl
 	if mainBranch == "" {
 		return fmt.Errorf("main branch not available")
 	}
-	
+
 	// Fetch the latest commit from the main branch
 	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s", workspace, repoSlug, mainBranch)
-	
+
 	res, err := client.Get(url)
 	if err != nil {
 		return fmt.Errorf("failed to fetch latest commit: %w", err)
 	}
-	
+
 	if res.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("main branch %s not found", mainBranch)
 	}
-	
+
 	if res.Body == nil {
 		return fmt.Errorf("no response body from commit API")
 	}
-	
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read commit response: %w", err)
 	}
-	
+
 	var commitResponse struct {
 		Hash string `json:"hash"`
 	}
-	
+
 	if err := json.Unmarshal(body, &commitResponse); err != nil {
 		return fmt.Errorf("failed to parse commit response: %w", err)
 	}
-	
+
 	if commitResponse.Hash != "" {
 		d.Set("latest_commit_hash", commitResponse.Hash)
 		d.Set("head_commit_hash", commitResponse.Hash) // For most repos, latest = head
 	}
-	
+
 	return nil
 }

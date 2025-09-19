@@ -158,7 +158,7 @@ func flattenCommits(c *CommitsResponse, d *schema.ResourceData) {
 	}
 
 	d.Set("commits", commits)
-	
+
 	// Set the latest commit hash if we have commits
 	if len(c.Values) > 0 {
 		d.Set("latest_commit_hash", c.Values[0].Hash)

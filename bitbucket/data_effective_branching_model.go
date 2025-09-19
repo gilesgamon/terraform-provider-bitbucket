@@ -118,17 +118,17 @@ func dataEffectiveBranchingModelRead(ctx context.Context, d *schema.ResourceData
 
 // EffectiveBranchingModelData represents the effective branching model configuration
 type EffectiveBranchingModelData struct {
-	Development  map[string]interface{} `json:"development"`
-	Production   map[string]interface{} `json:"production"`
-	BranchTypes  []EffectiveBranchTypeData `json:"branch_types"`
-	Links        map[string]interface{} `json:"links"`
+	Development map[string]interface{}    `json:"development"`
+	Production  map[string]interface{}    `json:"production"`
+	BranchTypes []EffectiveBranchTypeData `json:"branch_types"`
+	Links       map[string]interface{}    `json:"links"`
 }
 
 // EffectiveBranchTypeData represents an effective branch type configuration
 type EffectiveBranchTypeData struct {
-	Kind   string `json:"kind"`
-	Prefix string `json:"prefix"`
-	Enabled bool  `json:"enabled"`
+	Kind    string `json:"kind"`
+	Prefix  string `json:"prefix"`
+	Enabled bool   `json:"enabled"`
 }
 
 // Flattens the effective branching model information
@@ -144,8 +144,8 @@ func flattenEffectiveBranchingModel(c *EffectiveBranchingModelData, d *schema.Re
 	branchTypes := make([]interface{}, len(c.BranchTypes))
 	for i, branchType := range c.BranchTypes {
 		branchTypes[i] = map[string]interface{}{
-			"kind":   branchType.Kind,
-			"prefix": branchType.Prefix,
+			"kind":    branchType.Kind,
+			"prefix":  branchType.Prefix,
 			"enabled": branchType.Enabled,
 		}
 	}

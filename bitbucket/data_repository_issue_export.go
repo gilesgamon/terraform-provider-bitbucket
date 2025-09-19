@@ -117,12 +117,12 @@ func dataRepositoryIssueExportRead(ctx context.Context, d *schema.ResourceData, 
 
 // RepositoryIssueExport represents the response from the repository issue export API
 type RepositoryIssueExport struct {
-	UUID         string                 `json:"uuid"`
-	Status       string                 `json:"status"`
-	CreatedOn    string                 `json:"created_on"`
-	UpdatedOn    string                 `json:"updated_on"`
-	DownloadURL  string                 `json:"download_url"`
-	Links        map[string]interface{} `json:"links"`
+	UUID        string                 `json:"uuid"`
+	Status      string                 `json:"status"`
+	CreatedOn   string                 `json:"created_on"`
+	UpdatedOn   string                 `json:"updated_on"`
+	DownloadURL string                 `json:"download_url"`
+	Links       map[string]interface{} `json:"links"`
 }
 
 // Flattens the repository issue export information
@@ -132,12 +132,12 @@ func flattenRepositoryIssueExport(c *RepositoryIssueExport, d *schema.ResourceDa
 	}
 
 	export := map[string]interface{}{
-		"uuid":          c.UUID,
-		"status":        c.Status,
-		"created_on":    c.CreatedOn,
-		"updated_on":    c.UpdatedOn,
-		"download_url":  c.DownloadURL,
-		"links":         c.Links,
+		"uuid":         c.UUID,
+		"status":       c.Status,
+		"created_on":   c.CreatedOn,
+		"updated_on":   c.UpdatedOn,
+		"download_url": c.DownloadURL,
+		"links":        c.Links,
 	}
 
 	d.Set("export", []interface{}{export})

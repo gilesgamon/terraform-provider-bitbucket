@@ -116,10 +116,10 @@ type PipelineStepVariablesListResponse struct {
 
 // PipelineStepVariableItem represents a variable item from a pipeline step
 type PipelineStepVariableItem struct {
-	Key      string `json:"key"`
-	Value    string `json:"value"`
-	Type     string `json:"type"`
-	Secured  bool   `json:"secured"`
+	Key     string `json:"key"`
+	Value   string `json:"value"`
+	Type    string `json:"type"`
+	Secured bool   `json:"secured"`
 }
 
 // Flattens the pipeline step variables list information

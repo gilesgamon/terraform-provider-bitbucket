@@ -134,14 +134,14 @@ type AddonsResponse struct {
 
 // Addon represents an addon in a repository
 type Addon struct {
-	AddonKey   string                 `json:"addon_key"`
-	Name       string                 `json:"name"`
+	AddonKey    string                 `json:"addon_key"`
+	Name        string                 `json:"name"`
 	Description string                 `json:"description"`
-	Vendor     map[string]interface{} `json:"vendor"`
-	AppInfo    map[string]interface{} `json:"app_info"`
-	Installed  bool                   `json:"installed"`
-	Enabled    bool                   `json:"enabled"`
-	Links      map[string]interface{} `json:"links"`
+	Vendor      map[string]interface{} `json:"vendor"`
+	AppInfo     map[string]interface{} `json:"app_info"`
+	Installed   bool                   `json:"installed"`
+	Enabled     bool                   `json:"enabled"`
+	Links       map[string]interface{} `json:"links"`
 }
 
 // Flattens the addons information

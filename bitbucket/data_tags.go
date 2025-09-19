@@ -126,12 +126,12 @@ type TagsResponse struct {
 
 // TagData represents a tag in the list
 type TagData struct {
-	Name   string                 `json:"name"`
-	Target map[string]interface{} `json:"target"`
+	Name    string                 `json:"name"`
+	Target  map[string]interface{} `json:"target"`
 	Message string                 `json:"message"`
-	Tagger map[string]interface{} `json:"tagger"`
-	Date   string                 `json:"date"`
-	Links  map[string]interface{} `json:"links"`
+	Tagger  map[string]interface{} `json:"tagger"`
+	Date    string                 `json:"date"`
+	Links   map[string]interface{} `json:"links"`
 }
 
 // Flattens the tags information
@@ -143,12 +143,12 @@ func flattenTags(c *TagsResponse, d *schema.ResourceData) {
 	tags := make([]interface{}, len(c.Values))
 	for i, tag := range c.Values {
 		tags[i] = map[string]interface{}{
-			"name":   tag.Name,
-			"target": tag.Target,
+			"name":    tag.Name,
+			"target":  tag.Target,
 			"message": tag.Message,
-			"tagger": tag.Tagger,
-			"date":   tag.Date,
-			"links":  tag.Links,
+			"tagger":  tag.Tagger,
+			"date":    tag.Date,
+			"links":   tag.Links,
 		}
 	}
 

@@ -134,14 +134,14 @@ type BranchRestrictionsResponse struct {
 
 // BranchRestrictionData represents a branch restriction rule
 type BranchRestrictionData struct {
-	ID        int      `json:"id"`
-	Kind      string   `json:"kind"`
-	Pattern   string   `json:"pattern"`
-	Value     int      `json:"value"`
-	Enabled   bool     `json:"enabled"`
-	Users     []string `json:"users"`
-	Groups    []string `json:"groups"`
-	Links     map[string]interface{} `json:"links"`
+	ID      int                    `json:"id"`
+	Kind    string                 `json:"kind"`
+	Pattern string                 `json:"pattern"`
+	Value   int                    `json:"value"`
+	Enabled bool                   `json:"enabled"`
+	Users   []string               `json:"users"`
+	Groups  []string               `json:"groups"`
+	Links   map[string]interface{} `json:"links"`
 }
 
 // Flattens the branch restrictions information
@@ -153,14 +153,14 @@ func flattenBranchRestrictions(c *BranchRestrictionsResponse, d *schema.Resource
 	restrictions := make([]interface{}, len(c.Values))
 	for i, restriction := range c.Values {
 		restrictions[i] = map[string]interface{}{
-			"id":       restriction.ID,
-			"kind":     restriction.Kind,
-			"pattern":  restriction.Pattern,
-			"value":    restriction.Value,
-			"enabled":  restriction.Enabled,
-			"users":    restriction.Users,
-			"groups":   restriction.Groups,
-			"links":    restriction.Links,
+			"id":      restriction.ID,
+			"kind":    restriction.Kind,
+			"pattern": restriction.Pattern,
+			"value":   restriction.Value,
+			"enabled": restriction.Enabled,
+			"users":   restriction.Users,
+			"groups":  restriction.Groups,
+			"links":   restriction.Links,
 		}
 	}
 

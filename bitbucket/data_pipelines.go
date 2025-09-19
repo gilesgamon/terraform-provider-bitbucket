@@ -193,18 +193,18 @@ type PipelinesResponse struct {
 
 // PipelineListItem represents a pipeline in the list
 type PipelineListItem struct {
-	UUID                string                 `json:"uuid"`
-	BuildNumber         int                    `json:"build_number"`
-	State               map[string]interface{} `json:"state"`
-	Trigger             map[string]interface{} `json:"trigger"`
-	Target              map[string]interface{} `json:"target"`
-	CreatedOn           string                 `json:"created_on"`
-	CompletedOn         string                 `json:"completed_on"`
-	DurationInSeconds   int                    `json:"duration_in_seconds"`
-	BuildSecondsUsed    int                    `json:"build_seconds_used"`
-	FirstSuccessful     bool                   `json:"first_successful"`
-	Expired             bool                   `json:"expired"`
-	Repository          map[string]interface{} `json:"repository"`
+	UUID              string                 `json:"uuid"`
+	BuildNumber       int                    `json:"build_number"`
+	State             map[string]interface{} `json:"state"`
+	Trigger           map[string]interface{} `json:"trigger"`
+	Target            map[string]interface{} `json:"target"`
+	CreatedOn         string                 `json:"created_on"`
+	CompletedOn       string                 `json:"completed_on"`
+	DurationInSeconds int                    `json:"duration_in_seconds"`
+	BuildSecondsUsed  int                    `json:"build_seconds_used"`
+	FirstSuccessful   bool                   `json:"first_successful"`
+	Expired           bool                   `json:"expired"`
+	Repository        map[string]interface{} `json:"repository"`
 }
 
 // Flattens the pipelines information
@@ -216,18 +216,18 @@ func flattenPipelines(c *PipelinesResponse, d *schema.ResourceData) {
 	pipelines := make([]interface{}, len(c.Values))
 	for i, pipeline := range c.Values {
 		pipelines[i] = map[string]interface{}{
-			"uuid":                  pipeline.UUID,
-			"build_number":          pipeline.BuildNumber,
-			"state":                 pipeline.State,
-			"trigger":               pipeline.Trigger,
-			"target":                pipeline.Target,
-			"created_on":            pipeline.CreatedOn,
-			"completed_on":          pipeline.CompletedOn,
-			"duration_in_seconds":   pipeline.DurationInSeconds,
-			"build_seconds_used":    pipeline.BuildSecondsUsed,
-			"first_successful":      pipeline.FirstSuccessful,
-			"expired":               pipeline.Expired,
-			"repository":            pipeline.Repository,
+			"uuid":                pipeline.UUID,
+			"build_number":        pipeline.BuildNumber,
+			"state":               pipeline.State,
+			"trigger":             pipeline.Trigger,
+			"target":              pipeline.Target,
+			"created_on":          pipeline.CreatedOn,
+			"completed_on":        pipeline.CompletedOn,
+			"duration_in_seconds": pipeline.DurationInSeconds,
+			"build_seconds_used":  pipeline.BuildSecondsUsed,
+			"first_successful":    pipeline.FirstSuccessful,
+			"expired":             pipeline.Expired,
+			"repository":          pipeline.Repository,
 		}
 	}
 

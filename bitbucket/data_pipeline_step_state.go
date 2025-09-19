@@ -103,10 +103,10 @@ func dataPipelineStepStateRead(ctx context.Context, d *schema.ResourceData, m in
 
 // PipelineStepStateResponse represents the response from the pipeline step state API
 type PipelineStepStateResponse struct {
-	State        string `json:"state"`
-	Name         string `json:"name"`
-	StartedOn    string `json:"started_on"`
-	CompletedOn  string `json:"completed_on"`
+	State       string `json:"state"`
+	Name        string `json:"name"`
+	StartedOn   string `json:"started_on"`
+	CompletedOn string `json:"completed_on"`
 }
 
 // Flattens the pipeline step state information

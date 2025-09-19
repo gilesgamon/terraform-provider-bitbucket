@@ -132,13 +132,13 @@ type RepositoryDeploymentChangesResponse struct {
 
 // RepositoryDeploymentChange represents a deployment change
 type RepositoryDeploymentChange struct {
-	UUID        string                 `json:"uuid"`
-	Version     string                 `json:"version"`
-	State       string                 `json:"state"`
-	Deployment  map[string]interface{} `json:"deployment"`
-	CreatedOn   string                 `json:"created_on"`
-	UpdatedOn   string                 `json:"updated_on"`
-	Links       map[string]interface{} `json:"links"`
+	UUID       string                 `json:"uuid"`
+	Version    string                 `json:"version"`
+	State      string                 `json:"state"`
+	Deployment map[string]interface{} `json:"deployment"`
+	CreatedOn  string                 `json:"created_on"`
+	UpdatedOn  string                 `json:"updated_on"`
+	Links      map[string]interface{} `json:"links"`
 }
 
 // Flattens the repository deployment changes information

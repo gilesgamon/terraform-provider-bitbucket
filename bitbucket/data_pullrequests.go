@@ -246,20 +246,20 @@ type PullRequestsResponse struct {
 
 // PullRequestListItem represents a pull request in the list
 type PullRequestListItem struct {
-	ID          int                    `json:"id"`
-	Title       string                 `json:"title"`
-	Description string                 `json:"description"`
-	State       string                 `json:"state"`
-	Author      string                 `json:"author"`
-	Source      map[string]interface{} `json:"source"`
-	Destination map[string]interface{} `json:"destination"`
-	CreatedOn   string                 `json:"created_on"`
-	UpdatedOn   string                 `json:"updated_on"`
-	MergeCommit map[string]interface{} `json:"merge_commit"`
-	ClosedBy    string                 `json:"closed_by"`
-	ClosedOn    string                 `json:"closed_on"`
-	Reviewers   []PullRequestListItemReviewer  `json:"reviewers"`
-	Links       map[string]interface{} `json:"links"`
+	ID          int                           `json:"id"`
+	Title       string                        `json:"title"`
+	Description string                        `json:"description"`
+	State       string                        `json:"state"`
+	Author      string                        `json:"author"`
+	Source      map[string]interface{}        `json:"source"`
+	Destination map[string]interface{}        `json:"destination"`
+	CreatedOn   string                        `json:"created_on"`
+	UpdatedOn   string                        `json:"updated_on"`
+	MergeCommit map[string]interface{}        `json:"merge_commit"`
+	ClosedBy    string                        `json:"closed_by"`
+	ClosedOn    string                        `json:"closed_on"`
+	Reviewers   []PullRequestListItemReviewer `json:"reviewers"`
+	Links       map[string]interface{}        `json:"links"`
 }
 
 // PullRequestListItemReviewer represents a reviewer on a pull request list item

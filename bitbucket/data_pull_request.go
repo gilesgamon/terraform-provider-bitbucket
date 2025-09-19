@@ -215,7 +215,7 @@ type PullRequestCommit struct {
 type PullRequestReviewer struct {
 	User     bitbucket.Account `json:"user"`
 	Type     string            `json:"type"`
-	Approved bool               `json:"approved"`
+	Approved bool              `json:"approved"`
 }
 
 // Flattens the pull request information

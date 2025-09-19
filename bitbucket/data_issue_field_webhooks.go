@@ -136,13 +136,13 @@ type IssueFieldWebhooksResponse struct {
 
 // IssueFieldWebhook represents a webhook for an issue field
 type IssueFieldWebhook struct {
-	UUID      string   `json:"uuid"`
-	Name      string   `json:"name"`
-	URL       string   `json:"url"`
-	Events    []string `json:"events"`
-	Enabled   bool     `json:"enabled"`
-	CreatedOn string   `json:"created_on"`
-	UpdatedOn string   `json:"updated_on"`
+	UUID      string                 `json:"uuid"`
+	Name      string                 `json:"name"`
+	URL       string                 `json:"url"`
+	Events    []string               `json:"events"`
+	Enabled   bool                   `json:"enabled"`
+	CreatedOn string                 `json:"created_on"`
+	UpdatedOn string                 `json:"updated_on"`
 	Links     map[string]interface{} `json:"links"`
 }
 

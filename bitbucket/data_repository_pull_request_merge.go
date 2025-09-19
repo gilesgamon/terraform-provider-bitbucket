@@ -119,12 +119,12 @@ func dataRepositoryPullRequestMergeRead(ctx context.Context, d *schema.ResourceD
 
 // RepositoryPullRequestMerge represents the response from the repository pull request merge API
 type RepositoryPullRequestMerge struct {
-	MergeStatus        map[string]interface{} `json:"merge_status"`
-	MergeCommit        map[string]interface{} `json:"merge_commit"`
-	CloseSourceBranch  bool                   `json:"close_source_branch"`
-	MergeStrategy      string                 `json:"merge_strategy"`
-	Destination        map[string]interface{} `json:"destination"`
-	Source             map[string]interface{} `json:"source"`
+	MergeStatus       map[string]interface{} `json:"merge_status"`
+	MergeCommit       map[string]interface{} `json:"merge_commit"`
+	CloseSourceBranch bool                   `json:"close_source_branch"`
+	MergeStrategy     string                 `json:"merge_strategy"`
+	Destination       map[string]interface{} `json:"destination"`
+	Source            map[string]interface{} `json:"source"`
 }
 
 // Flattens the repository pull request merge information

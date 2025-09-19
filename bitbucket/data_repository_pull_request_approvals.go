@@ -121,10 +121,10 @@ type RepositoryPullRequestApprovalsResponse struct {
 
 // RepositoryPullRequestApproval represents a pull request approval
 type RepositoryPullRequestApproval struct {
-	User        map[string]interface{} `json:"user"`
-	ApprovedOn  string                 `json:"approved_on"`
-	Role        string                 `json:"role"`
-	Links       map[string]interface{} `json:"links"`
+	User       map[string]interface{} `json:"user"`
+	ApprovedOn string                 `json:"approved_on"`
+	Role       string                 `json:"role"`
+	Links      map[string]interface{} `json:"links"`
 }
 
 // Flattens the repository pull request approvals information
@@ -136,10 +136,10 @@ func flattenRepositoryPullRequestApprovals(c *RepositoryPullRequestApprovalsResp
 	approvals := make([]interface{}, len(c.Values))
 	for i, approval := range c.Values {
 		approvals[i] = map[string]interface{}{
-			"user":         approval.User,
-			"approved_on":  approval.ApprovedOn,
-			"role":         approval.Role,
-			"links":        approval.Links,
+			"user":        approval.User,
+			"approved_on": approval.ApprovedOn,
+			"role":        approval.Role,
+			"links":       approval.Links,
 		}
 	}
 

@@ -137,16 +137,16 @@ type WebhooksResponse struct {
 
 // Webhook represents a webhook
 type Webhook struct {
-	UUID                 string                   `json:"uuid"`
-	Description          string                   `json:"description"`
-	URL                  string                   `json:"url"`
-	Active               bool                     `json:"active"`
-	Events               []string                 `json:"events"`
-	SkipCertVerification bool                     `json:"skip_cert_verification"`
-	CreatedOn            string                   `json:"created_on"`
-	UpdatedOn            string                   `json:"updated_on"`
-	Subject              map[string]interface{}  `json:"subject"`
-	Links                map[string]interface{}  `json:"links"`
+	UUID                 string                 `json:"uuid"`
+	Description          string                 `json:"description"`
+	URL                  string                 `json:"url"`
+	Active               bool                   `json:"active"`
+	Events               []string               `json:"events"`
+	SkipCertVerification bool                   `json:"skip_cert_verification"`
+	CreatedOn            string                 `json:"created_on"`
+	UpdatedOn            string                 `json:"updated_on"`
+	Subject              map[string]interface{} `json:"subject"`
+	Links                map[string]interface{} `json:"links"`
 }
 
 // Flattens the webhooks information

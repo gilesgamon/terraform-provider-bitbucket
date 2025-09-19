@@ -171,16 +171,16 @@ func flattenCommitPullrequests(c *CommitPullrequestsResponse, d *schema.Resource
 	pullrequests := make([]interface{}, len(c.Values))
 	for i, pr := range c.Values {
 		pullrequests[i] = map[string]interface{}{
-			"id":           pr.ID,
-			"title":        pr.Title,
-			"description":  pr.Description,
-			"state":        pr.State,
-			"author":       pr.Author,
-			"source":       pr.Source,
-			"destination":  pr.Destination,
-			"created_on":   pr.CreatedOn,
-			"updated_on":   pr.UpdatedOn,
-			"links":        pr.Links,
+			"id":          pr.ID,
+			"title":       pr.Title,
+			"description": pr.Description,
+			"state":       pr.State,
+			"author":      pr.Author,
+			"source":      pr.Source,
+			"destination": pr.Destination,
+			"created_on":  pr.CreatedOn,
+			"updated_on":  pr.UpdatedOn,
+			"links":       pr.Links,
 		}
 	}
 

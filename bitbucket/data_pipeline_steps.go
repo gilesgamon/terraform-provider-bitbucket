@@ -144,16 +144,16 @@ type PipelineStepsResponse struct {
 
 // PipelineStep represents a pipeline step
 type PipelineStep struct {
-	UUID                string                 `json:"uuid"`
-	Name                string                 `json:"name"`
-	Type                string                 `json:"type"`
-	State               string                 `json:"state"`
-	StartedOn           string                 `json:"started_on"`
-	CompletedOn         string                 `json:"completed_on"`
-	DurationInSeconds   int                    `json:"duration_in_seconds"`
-	MaxTime             int                    `json:"max_time"`
-	Script              map[string]interface{} `json:"script"`
-	Links               map[string]interface{} `json:"links"`
+	UUID              string                 `json:"uuid"`
+	Name              string                 `json:"name"`
+	Type              string                 `json:"type"`
+	State             string                 `json:"state"`
+	StartedOn         string                 `json:"started_on"`
+	CompletedOn       string                 `json:"completed_on"`
+	DurationInSeconds int                    `json:"duration_in_seconds"`
+	MaxTime           int                    `json:"max_time"`
+	Script            map[string]interface{} `json:"script"`
+	Links             map[string]interface{} `json:"links"`
 }
 
 // Flattens the pipeline steps information
@@ -165,16 +165,16 @@ func flattenPipelineSteps(c *PipelineStepsResponse, d *schema.ResourceData) {
 	steps := make([]interface{}, len(c.Values))
 	for i, step := range c.Values {
 		steps[i] = map[string]interface{}{
-			"uuid":                  step.UUID,
-			"name":                  step.Name,
-			"type":                  step.Type,
-			"state":                 step.State,
-			"started_on":            step.StartedOn,
-			"completed_on":          step.CompletedOn,
-			"duration_in_seconds":   step.DurationInSeconds,
-			"max_time":              step.MaxTime,
-			"script":                step.Script,
-			"links":                 step.Links,
+			"uuid":                step.UUID,
+			"name":                step.Name,
+			"type":                step.Type,
+			"state":               step.State,
+			"started_on":          step.StartedOn,
+			"completed_on":        step.CompletedOn,
+			"duration_in_seconds": step.DurationInSeconds,
+			"max_time":            step.MaxTime,
+			"script":              step.Script,
+			"links":               step.Links,
 		}
 	}
 

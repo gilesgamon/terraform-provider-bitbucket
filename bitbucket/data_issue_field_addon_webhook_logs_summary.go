@@ -112,15 +112,15 @@ func flattenIssueFieldAddonWebhookLogsSummary(c *IssueFieldAddonWebhookLogsSumma
 	}
 
 	summary := map[string]interface{}{
-		"total_logs":    c.TotalLogs,
-		"error_logs":    c.ErrorLogs,
-		"warning_logs":  c.WarningLogs,
-		"info_logs":     c.InfoLogs,
-		"debug_logs":    c.DebugLogs,
-		"last_log_time": c.LastLogTime,
+		"total_logs":     c.TotalLogs,
+		"error_logs":     c.ErrorLogs,
+		"warning_logs":   c.WarningLogs,
+		"info_logs":      c.InfoLogs,
+		"debug_logs":     c.DebugLogs,
+		"last_log_time":  c.LastLogTime,
 		"first_log_time": c.FirstLogTime,
-		"webhooks":      c.Webhooks,
-		"links":         c.Links,
+		"webhooks":       c.Webhooks,
+		"links":          c.Links,
 	}
 
 	d.Set("summary", summary)

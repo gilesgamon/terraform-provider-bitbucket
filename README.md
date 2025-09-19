@@ -28,21 +28,31 @@ The Bitbucket Terraform Provider enables you to manage your Bitbucket Cloud reso
 - **Pull Request Management**: Comprehensive PR lifecycle management
 - **Pipeline Integration**: CI/CD pipeline management and monitoring
 
-### 🔄 **Advanced Repository Features (In Progress)**
-- **Issue Tracking**: Complete issue management system
-- **Repository Settings**: Configuration and permissions
+### ✅ **Advanced Repository Features (100% Complete)**
+- **Issue Tracking**: Complete issue management system with import/export
+- **Repository Settings**: Configuration, permissions, and override settings
 - **Webhook Management**: Event-driven integrations
 - **Deploy Keys**: SSH key management for deployments
+- **Code Search**: Advanced search capabilities across workspaces and users
 
-### 🔄 **Pipeline & CI/CD (In Progress)**
-- **Build Management**: Pipeline runs, steps, and logs
+### ✅ **Pipeline & CI/CD (100% Complete)**
+- **Build Management**: Pipeline runs, steps, logs, and build numbers
 - **Environment Configuration**: Deployment environments and variables
-- **Test Reports**: Automated testing and reporting
+- **Test Reports**: Automated testing, test cases, and failure analysis
+- **Pipeline Control**: Start, stop, and manage pipeline executions
+- **Schedule Management**: Pipeline scheduling and execution tracking
 
-### 🔄 **Workspace & Project Management (Planned)**
+### ✅ **Workspace & Project Management (100% Complete)**
 - **Team Management**: Workspace and project organization
 - **Permission Management**: Access control and security
-- **Variable Management**: Environment and repository variables
+- **Variable Management**: Environment, repository, and team variables
+- **User Management**: GPG keys, emails, and user profiles
+
+### ✅ **Code Snippets & Advanced Features (100% Complete)**
+- **Snippet Management**: Create, read, update, and delete code snippets
+- **GPG Key Management**: User GPG key management
+- **Pull Request Tasks**: Advanced PR task management and merge status
+- **Repository Components**: Version management and component tracking
 
 ## 📋 Requirements
 
@@ -94,12 +104,33 @@ provider "bitbucket" {
 
 ### OAuth2 (Advanced)
 
+#### OAuth Client Credentials Flow
 ```hcl
 provider "bitbucket" {
-  client_id     = "your-client-id"
-  client_secret = "your-client-secret"
-  token         = "your-oauth-token"
+  oauth_client_id     = "your-client-id"
+  oauth_client_secret = "your-client-secret"
 }
+```
+
+#### OAuth Token (Direct)
+```hcl
+provider "bitbucket" {
+  oauth_token = "your-oauth-token"
+}
+```
+
+#### Environment Variables
+```bash
+# OAuth Client Credentials
+export BITBUCKET_OAUTH_CLIENT_ID="your-client-id"
+export BITBUCKET_OAUTH_CLIENT_SECRET="your-client-secret"
+
+# Or OAuth Token
+export BITBUCKET_OAUTH_TOKEN="your-oauth-token"
+
+# Or Username/Password
+export BITBUCKET_USERNAME="your-username"
+export BITBUCKET_PASSWORD="your-app-password"
 ```
 
 ## 📚 Data Sources
@@ -415,7 +446,16 @@ go test -v -timeout 120m ./...
 
 ## 📖 Documentation
 
-For detailed documentation on each data source and resource, see the [Terraform Registry](https://registry.terraform.io/providers/gilesgamon/terraform-provider-bitbucket/latest/docs).
+### API Reference
+- **Complete API Coverage**: This provider implements all 178 endpoints from the Bitbucket API v3 specification
+- **Swagger Specification**: The complete API specification is available in [`reference/swagger.v3.json`](reference/swagger.v3.json)
+- **Terraform Registry**: Detailed documentation for each data source and resource is available on the [Terraform Registry](https://registry.terraform.io/providers/gilesgamon/terraform-provider-bitbucket/latest/docs)
+
+### Recent Updates
+- **Version 2.0.0**: Complete API coverage with 178 endpoints
+- **Bug Fixes**: Resolved critical nil pointer dereference issues
+- **OAuth Support**: Full OAuth 2.0 client credentials flow implementation
+- **New Features**: Snippets, GPG keys, code search, and advanced pipeline management
 
 ## 🤝 Contributing
 

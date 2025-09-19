@@ -115,11 +115,11 @@ type PipelineArtifactsResponse struct {
 
 // PipelineArtifact represents a pipeline artifact
 type PipelineArtifact struct {
-	Name         string `json:"name"`
-	Type         string `json:"type"`
-	Size         int    `json:"size"`
-	DownloadURL  string `json:"download_url"`
-	CreatedOn    string `json:"created_on"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Size        int    `json:"size"`
+	DownloadURL string `json:"download_url"`
+	CreatedOn   string `json:"created_on"`
 }
 
 // Flattens the pipeline artifacts information
@@ -131,11 +131,11 @@ func flattenPipelineArtifacts(c *PipelineArtifactsResponse, d *schema.ResourceDa
 	artifacts := make([]interface{}, len(c.Values))
 	for i, artifact := range c.Values {
 		artifacts[i] = map[string]interface{}{
-			"name":          artifact.Name,
-			"type":          artifact.Type,
-			"size":          artifact.Size,
-			"download_url":  artifact.DownloadURL,
-			"created_on":    artifact.CreatedOn,
+			"name":         artifact.Name,
+			"type":         artifact.Type,
+			"size":         artifact.Size,
+			"download_url": artifact.DownloadURL,
+			"created_on":   artifact.CreatedOn,
 		}
 	}
 

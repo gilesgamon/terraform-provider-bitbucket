@@ -20,7 +20,7 @@ func dataRepositoryFileHistory() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-		"repo_slug": {
+			"repo_slug": {
 				Type:     schema.TypeString,
 				Required: true,
 			},

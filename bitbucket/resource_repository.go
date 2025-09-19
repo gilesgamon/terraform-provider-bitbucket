@@ -345,7 +345,8 @@ func resourceRepositoryRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	repoRes, res, err := repoApi.RepositoriesWorkspaceRepoSlugGet(c.AuthContext, repoSlug, workspace)
 
-	if res.StatusCode == http.StatusNotFound {
+	// Check for nil response first to avoid nil pointer dereference
+	if res != nil && res.StatusCode == http.StatusNotFound {
 		log.Printf("[WARN] Repository (%s) not found, removing from state", d.Id())
 		d.SetId("")
 		return nil
@@ -386,15 +387,17 @@ func resourceRepositoryRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	pipelinesConfigReq, res, err := pipeApi.GetRepositoryPipelineConfig(c.AuthContext, workspace, repoSlug)
-	if err := handleClientError(res, err); err != nil && res.StatusCode != http.StatusNotFound {
+	if err := handleClientError(res, err); err != nil && res != nil && res.StatusCode != http.StatusNotFound {
 		return diag.FromErr(err)
 	}
 
-	switch res.StatusCode {
-	case http.StatusOK:
-		d.Set("pipelines_enabled", pipelinesConfigReq.Enabled)
-	case http.StatusNotFound:
-		d.Set("pipelines_enabled", false)
+	if res != nil {
+		switch res.StatusCode {
+		case http.StatusOK:
+			d.Set("pipelines_enabled", pipelinesConfigReq.Enabled)
+		case http.StatusNotFound:
+			d.Set("pipelines_enabled", false)
+		}
 	}
 
 	settingReq, err := client.Get(fmt.Sprintf("2.0/repositories/%s/%s/override-settings",

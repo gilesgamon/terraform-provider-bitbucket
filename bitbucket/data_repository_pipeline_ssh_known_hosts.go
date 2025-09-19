@@ -117,9 +117,9 @@ func dataRepositoryPipelineSSHKnownHostsRead(ctx context.Context, d *schema.Reso
 // RepositoryPipelineSSHKnownHostsResponse represents the response from the repository pipeline SSH known hosts API
 type RepositoryPipelineSSHKnownHostsResponse struct {
 	Values []RepositoryPipelineSSHKnownHost `json:"values"`
-	Page   int                             `json:"page"`
-	Size   int                             `json:"size"`
-	Next   string                          `json:"next"`
+	Page   int                              `json:"page"`
+	Size   int                              `json:"size"`
+	Next   string                           `json:"next"`
 }
 
 // RepositoryPipelineSSHKnownHost represents an SSH known host

@@ -128,14 +128,14 @@ type PipelineKnownHostsResponse struct {
 
 // PipelineKnownHost represents a pipeline known host
 type PipelineKnownHost struct {
-	UUID       string                 `json:"uuid"`
-	Hostname   string                 `json:"hostname"`
-	PublicKey  string                 `json:"public_key"`
-	KeyType    string                 `json:"key_type"`
-	Fingerprint string                `json:"fingerprint"`
-	CreatedOn  string                 `json:"created_on"`
-	UpdatedOn  string                 `json:"updated_on"`
-	Links      map[string]interface{} `json:"links"`
+	UUID        string                 `json:"uuid"`
+	Hostname    string                 `json:"hostname"`
+	PublicKey   string                 `json:"public_key"`
+	KeyType     string                 `json:"key_type"`
+	Fingerprint string                 `json:"fingerprint"`
+	CreatedOn   string                 `json:"created_on"`
+	UpdatedOn   string                 `json:"updated_on"`
+	Links       map[string]interface{} `json:"links"`
 }
 
 // Flattens the pipeline known hosts information

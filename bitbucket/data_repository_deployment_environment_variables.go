@@ -126,9 +126,9 @@ func dataRepositoryDeploymentEnvironmentVariablesRead(ctx context.Context, d *sc
 // RepositoryDeploymentEnvironmentVariablesResponse represents the response from the repository deployment environment variables API
 type RepositoryDeploymentEnvironmentVariablesResponse struct {
 	Values []RepositoryDeploymentEnvironmentVariable `json:"values"`
-	Page   int                                        `json:"page"`
-	Size   int                                        `json:"size"`
-	Next   string                                     `json:"next"`
+	Page   int                                       `json:"page"`
+	Size   int                                       `json:"size"`
+	Next   string                                    `json:"next"`
 }
 
 // RepositoryDeploymentEnvironmentVariable represents a deployment environment variable

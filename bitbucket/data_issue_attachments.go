@@ -117,9 +117,9 @@ type IssueAttachmentsResponse struct {
 
 // IssueAttachment represents an attachment on an issue
 type IssueAttachment struct {
-	UUID string                 `json:"uuid"`
-	Name string                 `json:"name"`
-	Size int                    `json:"size"`
+	UUID  string                 `json:"uuid"`
+	Name  string                 `json:"name"`
+	Size  int                    `json:"size"`
 	Links map[string]interface{} `json:"links"`
 }
 

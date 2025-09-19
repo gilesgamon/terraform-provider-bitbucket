@@ -116,11 +116,11 @@ type RepositoryDownloadsResponse struct {
 
 // RepositoryDownload represents a download in a repository
 type RepositoryDownload struct {
-	Name       string                 `json:"name"`
-	Size       int                    `json:"size"`
-	Downloads  int                    `json:"downloads"`
-	CreatedOn  string                 `json:"created_on"`
-	Links      map[string]interface{} `json:"links"`
+	Name      string                 `json:"name"`
+	Size      int                    `json:"size"`
+	Downloads int                    `json:"downloads"`
+	CreatedOn string                 `json:"created_on"`
+	Links     map[string]interface{} `json:"links"`
 }
 
 // Flattens the repository downloads information
@@ -132,11 +132,11 @@ func flattenRepositoryDownloads(c *RepositoryDownloadsResponse, d *schema.Resour
 	downloads := make([]interface{}, len(c.Values))
 	for i, download := range c.Values {
 		downloads[i] = map[string]interface{}{
-			"name":      download.Name,
-			"size":      download.Size,
-			"downloads": download.Downloads,
+			"name":       download.Name,
+			"size":       download.Size,
+			"downloads":  download.Downloads,
 			"created_on": download.CreatedOn,
-			"links":     download.Links,
+			"links":      download.Links,
 		}
 	}
 

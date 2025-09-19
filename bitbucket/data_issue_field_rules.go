@@ -163,15 +163,15 @@ func flattenIssueFieldRules(c *IssueFieldRulesResponse, d *schema.ResourceData) 
 	rules := make([]interface{}, len(c.Values))
 	for i, rule := range c.Values {
 		rules[i] = map[string]interface{}{
-			"uuid":      rule.UUID,
-			"name":      rule.Name,
-			"type":      rule.Type,
-			"condition": rule.Condition,
-			"action":    rule.Action,
-			"enabled":   rule.Enabled,
+			"uuid":       rule.UUID,
+			"name":       rule.Name,
+			"type":       rule.Type,
+			"condition":  rule.Condition,
+			"action":     rule.Action,
+			"enabled":    rule.Enabled,
 			"created_on": rule.CreatedOn,
 			"updated_on": rule.UpdatedOn,
-			"links":     rule.Links,
+			"links":      rule.Links,
 		}
 	}
 

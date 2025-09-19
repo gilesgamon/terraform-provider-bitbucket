@@ -118,17 +118,17 @@ func dataBranchingModelRead(ctx context.Context, d *schema.ResourceData, m inter
 
 // BranchingModelData represents the branching model configuration
 type BranchingModelData struct {
-	Development  map[string]interface{} `json:"development"`
-	Production   map[string]interface{} `json:"production"`
-	BranchTypes  []BranchTypeData      `json:"branch_types"`
-	Links        map[string]interface{} `json:"links"`
+	Development map[string]interface{} `json:"development"`
+	Production  map[string]interface{} `json:"production"`
+	BranchTypes []BranchTypeData       `json:"branch_types"`
+	Links       map[string]interface{} `json:"links"`
 }
 
 // BranchTypeData represents a branch type configuration
 type BranchTypeData struct {
-	Kind   string `json:"kind"`
-	Prefix string `json:"prefix"`
-	Enabled bool  `json:"enabled"`
+	Kind    string `json:"kind"`
+	Prefix  string `json:"prefix"`
+	Enabled bool   `json:"enabled"`
 }
 
 // Flattens the branching model information
@@ -144,8 +144,8 @@ func flattenBranchingModel(c *BranchingModelData, d *schema.ResourceData) {
 	branchTypes := make([]interface{}, len(c.BranchTypes))
 	for i, branchType := range c.BranchTypes {
 		branchTypes[i] = map[string]interface{}{
-			"kind":   branchType.Kind,
-			"prefix": branchType.Prefix,
+			"kind":    branchType.Kind,
+			"prefix":  branchType.Prefix,
 			"enabled": branchType.Enabled,
 		}
 	}

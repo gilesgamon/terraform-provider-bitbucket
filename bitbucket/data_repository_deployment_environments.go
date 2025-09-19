@@ -135,15 +135,15 @@ type RepositoryDeploymentEnvironmentsResponse struct {
 
 // RepositoryDeploymentEnvironment represents a deployment environment
 type RepositoryDeploymentEnvironment struct {
-	UUID                    string                 `json:"uuid"`
-	Name                    string                 `json:"name"`
-	EnvironmentType         string                 `json:"environment_type"`
-	Rank                    int                    `json:"rank"`
-	DeploymentGateEnabled   bool                   `json:"deployment_gate_enabled"`
-	DeploymentGateCheck     map[string]interface{} `json:"deployment_gate_check"`
-	CreatedOn               string                 `json:"created_on"`
-	UpdatedOn               string                 `json:"updated_on"`
-	Links                   map[string]interface{} `json:"links"`
+	UUID                  string                 `json:"uuid"`
+	Name                  string                 `json:"name"`
+	EnvironmentType       string                 `json:"environment_type"`
+	Rank                  int                    `json:"rank"`
+	DeploymentGateEnabled bool                   `json:"deployment_gate_enabled"`
+	DeploymentGateCheck   map[string]interface{} `json:"deployment_gate_check"`
+	CreatedOn             string                 `json:"created_on"`
+	UpdatedOn             string                 `json:"updated_on"`
+	Links                 map[string]interface{} `json:"links"`
 }
 
 // Flattens the repository deployment environments information
