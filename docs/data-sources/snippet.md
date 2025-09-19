@@ -1,3 +1,11 @@
+---
+layout: "bitbucket"
+page_title: "Bitbucket: bitbucket_snippet"
+sidebar_current: "docs-bitbucket-data-snippet"
+description: |-
+  Use this data source to access information about a specific Bitbucket snippet.
+---
+
 # bitbucket_snippet
 
 Use this data source to access information about a specific Bitbucket snippet.
@@ -34,16 +42,15 @@ In addition to all arguments above, the following attributes are exported:
 * `updated_on` - The last update timestamp.
 * `is_private` - Whether the snippet is private.
 * `owner` - The snippet owner information.
-  * `username` - Owner username.
-  * `display_name` - Owner display name.
-  * `uuid` - Owner UUID.
+    * `username` - Owner username.
+    * `display_name` - Owner display name.
+    * `uuid` - Owner UUID.
 * `creator` - The snippet creator information.
-  * `username` - Creator username.
-  * `display_name` - Creator display name.
-  * `uuid` - Creator UUID.
+    * `username` - Creator username.
+    * `display_name` - Creator display name.
+    * `uuid` - Creator UUID.
 * `links` - Snippet links.
-  * `self` - Self link.
-    * `href` - The URL.
-  * `html` - HTML link.
-    * `href` - The URL.
-
+    * `self` - Self link.
+        * `href` - The URL.
+    * `html` - HTML link.
+        * `href` - The URL.

@@ -1,3 +1,11 @@
+---
+layout: "bitbucket"
+page_title: "Bitbucket: bitbucket_snippets"
+sidebar_current: "docs-bitbucket-data-snippets"
+description: |-
+  Use this data source to access information about Bitbucket snippets.
+---
+
 # bitbucket_snippets
 
 Use this data source to access information about Bitbucket snippets.
@@ -35,23 +43,22 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The data source ID.
 * `snippets` - List of snippets.
-  * `id` - The numeric snippet ID.
-  * `title` - The snippet title.
-  * `scm` - The DVCS used to store the snippet.
-  * `created_on` - The creation timestamp.
-  * `updated_on` - The last update timestamp.
-  * `is_private` - Whether the snippet is private.
-  * `owner` - The snippet owner information.
-    * `username` - Owner username.
-    * `display_name` - Owner display name.
-    * `uuid` - Owner UUID.
-  * `creator` - The snippet creator information.
-    * `username` - Creator username.
-    * `display_name` - Creator display name.
-    * `uuid` - Creator UUID.
-  * `links` - Snippet links.
-    * `self` - Self link.
-      * `href` - The URL.
-    * `html` - HTML link.
-      * `href` - The URL.
-
+    * `id` - The numeric snippet ID.
+    * `title` - The snippet title.
+    * `scm` - The DVCS used to store the snippet.
+    * `created_on` - The creation timestamp.
+    * `updated_on` - The last update timestamp.
+    * `is_private` - Whether the snippet is private.
+    * `owner` - The snippet owner information.
+        * `username` - Owner username.
+        * `display_name` - Owner display name.
+        * `uuid` - Owner UUID.
+    * `creator` - The snippet creator information.
+        * `username` - Creator username.
+        * `display_name` - Creator display name.
+        * `uuid` - Creator UUID.
+    * `links` - Snippet links.
+        * `self` - Self link.
+            * `href` - The URL.
+        * `html` - HTML link.
+            * `href` - The URL.

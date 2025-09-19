@@ -1,3 +1,11 @@
+---
+layout: "bitbucket"
+page_title: "Bitbucket: bitbucket_snippet"
+sidebar_current: "docs-bitbucket-resource-snippet"
+description: |-
+  Provides a Bitbucket snippet resource. This allows snippets to be created, read, updated, and deleted.
+---
+
 # bitbucket_snippet
 
 Provides a Bitbucket snippet resource.
@@ -50,24 +58,23 @@ In addition to all arguments above, the following attributes are exported:
 * `created_on` - The creation timestamp.
 * `updated_on` - The last update timestamp.
 * `owner` - The snippet owner information.
-  * `username` - Owner username.
-  * `display_name` - Owner display name.
-  * `uuid` - Owner UUID.
+    * `username` - Owner username.
+    * `display_name` - Owner display name.
+    * `uuid` - Owner UUID.
 * `creator` - The snippet creator information.
-  * `username` - Creator username.
-  * `display_name` - Creator display name.
-  * `uuid` - Creator UUID.
+    * `username` - Creator username.
+    * `display_name` - Creator display name.
+    * `uuid` - Creator UUID.
 * `links` - Snippet links.
-  * `self` - Self link.
-    * `href` - The URL.
-  * `html` - HTML link.
-    * `href` - The URL.
+    * `self` - Self link.
+        * `href` - The URL.
+    * `html` - HTML link.
+        * `href` - The URL.
 
 ## Import
 
 Snippets can be imported using the `workspace/encoded_id` format:
 
+```bash
+terraform import bitbucket_snippet.example my-workspace/abc123def456
 ```
-$ terraform import bitbucket_snippet.example my-workspace/abc123def456
-```
-
