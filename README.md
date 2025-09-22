@@ -112,6 +112,50 @@ provider "bitbucket" {
 }
 ```
 
+
+Create a 'Consumer' by navigating: 'Workspace settings'->'OAuth consumers'->'Add consumer'
+
+![Add Consumer](./images/AddConsumer.png)
+
+For 'Callback URL' use "urn:ietf:wg:oauth:2.0:oob". The rest of the settins at your discretion but you need to grant sufficient 'scopes' for the work required. Here's an example error when attempting to plan without "repository:admin", which was required for the task I was attempting to complete. You cannot edit but must re-create if 'scopes' do not meet your needs.
+
+```
+│ Error: 403 Forbidden: {"type": "error", "error": {"message": "Your credentials lack one or more required privilege scopes.", "detail": {"required": ["repository:admin"], "granted": ["runner:write", "pipeline:variable", "webhook", "snippet:write", "wiki", "issue:write", "pullrequest:write", "project", "team"]}}}
+```
+
+![Details For Consumer](./images/DetailsForConsumer.png)
+
+Once saved, you should be able to access the secrets, using the '> terraform' in my example as follows;
+
+![OAuth Secrets](./images/OAuthSecrets.png)
+
+The 'Key' is the 'client_id' and 'Secret' is 'client_secret'. Which we're going to save like this;
+
+```
+ {
+	"oauth_client_id" :"ytsm12345678912345",
+	"oauth_client_secret" : "Gqxxxxxxxxx11111111112222222222y"
+}
+```
+
+Store a JSON object in AWS Secrets Manager (again suggest stick to build account) named `bitbucket-oauth-suffix` with keys `oauth_client_id` and `oauth_client_secret`, then configure the provider as follows:
+
+```hcl
+provider "aws" {
+  region = "eu-west-2"
+}
+
+data "aws_secretsmanager_secret_version" "bitbucket_oauth" {
+  secret_id = "bitbucket-oauth-suffix"
+}
+
+provider "bitbucket" {
+  oauth_client_id     = jsondecode(data.aws_secretsmanager_secret_version.bitbucket_oauth.secret_string)["oauth_client_id"]
+  oauth_client_secret = jsondecode(data.aws_secretsmanager_secret_version.bitbucket_oauth.secret_string)["oauth_client_secret"]
+}
+```
+
+
 #### OAuth Token (Direct)
 ```hcl
 provider "bitbucket" {
