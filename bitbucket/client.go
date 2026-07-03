@@ -209,6 +209,31 @@ func (c *Client) GetPaginated(endpoint string) ([]json.RawMessage, error) {
 	return values, nil
 }
 
+// GetAll fetches every page of a paginated collection endpoint and returns a
+// synthetic *http.Response whose body is a single JSON object of the form
+// {"values": [...]} containing the merged results. This lets existing callers
+// that unmarshal a `{ "values": [...] }` response transparently receive the
+// full result set instead of only the first page.
+func (c *Client) GetAll(endpoint string) (*http.Response, error) {
+	values, err := c.GetPaginated(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	merged, err := json.Marshal(struct {
+		Values []json.RawMessage `json:"values"`
+	}{Values: values})
+	if err != nil {
+		return nil, err
+	}
+
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     make(http.Header),
+		Body:       io.NopCloser(bytes.NewReader(merged)),
+	}, nil
+}
+
 // toRelativeEndpoint converts an absolute Bitbucket API URL (as returned in the
 // `next` field of paginated responses) into an endpoint relative to
 // BitbucketEndpoint, which is what Client.Do expects.
