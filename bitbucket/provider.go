@@ -86,6 +86,7 @@ func Provider() *schema.Provider {
 			"bitbucket_project":                     resourceProject(),
 			"bitbucket_project_branching_model":     resourceProjectBranchingModel(),
 			"bitbucket_project_default_reviewers":   resourceProjectDefaultReviewers(),
+			"bitbucket_project_deploy_key":          resourceProjectDeployKey(),
 			"bitbucket_project_group_permission":    resourceProjectGroupPermission(),
 			"bitbucket_project_user_permission":     resourceProjectUserPermission(),
 			"bitbucket_repository":                  resourceRepository(),
@@ -192,6 +193,7 @@ func Provider() *schema.Provider {
 			"bitbucket_workspace_permissions": dataWorkspacePermissions(),
 			"bitbucket_workspace_variables":   dataWorkspaceVariables(),
 			"bitbucket_project_permissions":   dataProjectPermissions(),
+			"bitbucket_project_deploy_keys":   dataProjectDeployKeys(),
 			// Phase 5: User & Group Management
 			"bitbucket_users":         dataUsers(),
 			"bitbucket_groups":        dataGroups(),
