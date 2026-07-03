@@ -1,3 +1,17 @@
+## Unreleased
+
+### ✨ New Data Sources
+
+* `bitbucket_tags` - List all Git tags in a repository (complements the singular `bitbucket_tag`).
+* `bitbucket_effective_branching_model` - The effective branching model for a repository, including project-level inheritance.
+* `bitbucket_branch_merge_base` - The common ancestor commit between two revisions.
+
+### 🧹 Cleanup
+
+* Removed 73 unused data source implementations that were never registered with the provider. These were either duplicates of existing data sources or targeted endpoints that do not exist in the Bitbucket Cloud API (for example, a fabricated `issue-fields/*` tree, per-step pipeline sub-resources such as `steps/{uuid}/max-seconds`, and an `addons/*/webhooks/*` tree). This removes dead code and the associated linter noise.
+* Fixed the endpoint URLs for the merge base (`/merge-base/{revspec}`) and effective branching model (`/effective-branching-model`) data sources so they match the real API, and corrected the merge base response to return the ancestor commit.
+* Formatted all Go source with `gofmt` and fixed an error-string lint warning.
+
 ## 0.1.6 (July 2026)
 
 ### ✨ New Features
