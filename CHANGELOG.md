@@ -1,3 +1,11 @@
+## Unreleased
+
+### 📖 Documentation
+
+* Added reference documentation for every registered resource and data source, closing a gap where 88 data sources and 2 resources (including the newer pipeline runner, conflicts, user-workspace, and project deploy key endpoints) had no docs page. List/collection data sources now document their nested item attributes.
+* Added a schema-driven documentation generator under `tools/docgen` to keep `docs/` in sync with the provider schema for future endpoints.
+* Fixed a typo on the provider index page.
+
 ## 0.1.6 (July 2026)
 
 ### ✨ New Features
