@@ -195,4 +195,3 @@ type GpgKey struct {
 type GpgKeyLinks struct {
 	Self Link `json:"self"`
 }
-

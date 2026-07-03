@@ -343,4 +343,3 @@ type SearchFile struct {
 type SearchFileLinks struct {
 	Self Link `json:"self"`
 }
-

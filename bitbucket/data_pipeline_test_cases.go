@@ -165,4 +165,3 @@ type TestCase struct {
 	Duration  float64 `json:"duration"`
 	CreatedOn string  `json:"created_on"`
 }
-

@@ -85,4 +85,3 @@ func dataPipelineBuildNumberRead(ctx context.Context, d *schema.ResourceData, m 
 
 	return nil
 }
-

@@ -161,4 +161,3 @@ func dataUserGpgKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 
 	return nil
 }
-

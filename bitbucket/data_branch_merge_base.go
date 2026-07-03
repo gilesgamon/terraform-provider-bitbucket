@@ -25,22 +25,62 @@ func dataBranchMergeBase() *schema.Resource {
 				Required: true,
 			},
 			"source": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The first revision (branch name, tag or commit hash).",
 			},
 			"target": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The second revision (branch name, tag or commit hash).",
 			},
-			"merge_base": {
+			"hash": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The hash of the common ancestor commit.",
+			},
+			"message": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"links": {
-				Type:     schema.TypeMap,
+			"date": {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+			},
+			"author": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"username": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"display_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"uuid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"parents": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"hash": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
 				},
 			},
 		},
@@ -55,7 +95,10 @@ func dataBranchMergeBaseRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataBranchMergeBaseRead", dumpResourceData(d, dataBranchMergeBase().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/merge-base/%s", workspace, repoSlug, source, target)
+	// The merge-base endpoint takes a single revspec containing exactly two
+	// revisions separated by two dots.
+	revspec := fmt.Sprintf("%s..%s", source, target)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/merge-base/%s", workspace, repoSlug, revspec)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -63,15 +106,15 @@ func dataBranchMergeBaseRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 	if res == nil {
-		return diag.Errorf("no response returned from branch merge base call. Make sure your credentials are accurate.")
+		return diag.Errorf("no response returned from merge base call. Make sure your credentials are accurate.")
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate branches %s or %s in repository %s/%s", source, target, workspace, repoSlug)
+		return diag.Errorf("unable to locate a common ancestor for %s and %s in repository %s/%s", source, target, workspace, repoSlug)
 	}
 
 	if res.Body == nil {
-		return diag.Errorf("error reading branch merge base with params (%s): ", dumpResourceData(d, dataBranchMergeBase().Schema))
+		return diag.Errorf("error reading merge base with params (%s): ", dumpResourceData(d, dataBranchMergeBase().Schema))
 	}
 
 	if err := handleClientError(res, err); err != nil {
@@ -83,31 +126,14 @@ func dataBranchMergeBaseRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(readerr)
 	}
 	log.Printf("[DEBUG] http response: %v", res)
-	log.Printf("[DEBUG] branch merge base response: %v", mergeBaseBody)
 
-	var mergeBase BranchMergeBaseData
-	decodeerr := json.Unmarshal(mergeBaseBody, &mergeBase)
+	var commit Commit
+	decodeerr := json.Unmarshal(mergeBaseBody, &commit)
 	if decodeerr != nil {
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/commits/%s/merge-base/%s", workspace, repoSlug, source, target))
-	flattenBranchMergeBase(&mergeBase, d)
+	d.SetId(fmt.Sprintf("%s/%s/merge-base/%s", workspace, repoSlug, revspec))
+	flattenCommit(&commit, d)
 	return nil
-}
-
-// BranchMergeBaseData represents the merge base between two branches
-type BranchMergeBaseData struct {
-	MergeBase string                 `json:"merge_base"`
-	Links     map[string]interface{} `json:"links"`
-}
-
-// Flattens the branch merge base information
-func flattenBranchMergeBase(c *BranchMergeBaseData, d *schema.ResourceData) {
-	if c == nil {
-		return
-	}
-
-	d.Set("merge_base", c.MergeBase)
-	d.Set("links", c.Links)
 }

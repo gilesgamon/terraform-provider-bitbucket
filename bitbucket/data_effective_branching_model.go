@@ -75,7 +75,7 @@ func dataEffectiveBranchingModelRead(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataEffectiveBranchingModelRead", dumpResourceData(d, dataEffectiveBranchingModel().Schema))
 
-	url := fmt.Sprintf("2.0/repositories/%s/%s/branching-model/effective", workspace, repoSlug)
+	url := fmt.Sprintf("2.0/repositories/%s/%s/effective-branching-model", workspace, repoSlug)
 
 	client := m.(Clients).httpClient
 	res, err := client.Get(url)
@@ -111,7 +111,7 @@ func dataEffectiveBranchingModelRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(decodeerr)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/branching-model/effective", workspace, repoSlug))
+	d.SetId(fmt.Sprintf("%s/%s/effective-branching-model", workspace, repoSlug))
 	flattenEffectiveBranchingModel(&effectiveModel, d)
 	return nil
 }

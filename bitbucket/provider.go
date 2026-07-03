@@ -119,6 +119,7 @@ func Provider() *schema.Provider {
 			"bitbucket_workspace_members":         dataWorkspaceMembers(),
 			// Enhanced data sources for pipeline integration
 			"bitbucket_tag":          dataTag(),
+			"bitbucket_tags":         dataTags(),
 			"bitbucket_commit":       dataCommit(),
 			"bitbucket_branch":       dataBranch(),
 			"bitbucket_pull_request": dataPullRequest(),
@@ -145,6 +146,8 @@ func Provider() *schema.Provider {
 			"bitbucket_repository_hooks":                  dataRepositoryHooks(),
 			"bitbucket_branch_restrictions":               dataBranchRestrictions(),
 			"bitbucket_branching_model":                   dataBranchingModel(),
+			"bitbucket_effective_branching_model":         dataEffectiveBranchingModel(),
+			"bitbucket_branch_merge_base":                 dataBranchMergeBase(),
 			"bitbucket_repository_forks":                  dataRepositoryForks(),
 			"bitbucket_repository_watchers":               dataRepositoryWatchers(),
 			"bitbucket_repository_files":                  dataRepositoryFiles(),
