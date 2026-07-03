@@ -32,5 +32,12 @@ fmt:
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
-.PHONY: build test testacc vet fmt fmtcheck
+lint:
+	golangci-lint run
+
+# Scaffold documentation pages for any endpoints that are missing one.
+docs:
+	go run ./tools/docgen
+
+.PHONY: build test testacc vet fmt fmtcheck lint docs
 
