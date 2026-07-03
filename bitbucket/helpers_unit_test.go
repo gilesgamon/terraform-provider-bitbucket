@@ -1,11 +1,51 @@
 package bitbucket
 
 import (
+	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
+
+// stubTransport serves canned responses keyed by request path (+ query).
+type stubTransport struct{ pages map[string]string }
+
+func (s stubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	key := req.URL.Path
+	if req.URL.RawQuery != "" {
+		key += "?" + req.URL.RawQuery
+	}
+	body, ok := s.pages[key]
+	status := http.StatusOK
+	if !ok {
+		status, body = http.StatusNotFound, `{"error":{"message":"not found"}}`
+	}
+	return &http.Response{
+		StatusCode: status,
+		Header:     make(http.Header),
+		Body:       io.NopCloser(strings.NewReader(body)),
+	}, nil
+}
+
+func TestGetAllMergesPages(t *testing.T) {
+	client := &Client{HTTPClient: &http.Client{Transport: stubTransport{pages: map[string]string{
+		"/2.0/foo":        `{"values":[{"n":1},{"n":2}],"next":"https://api.bitbucket.org/2.0/foo?page=2"}`,
+		"/2.0/foo?page=2": `{"values":[{"n":3}]}`,
+	}}}}
+
+	res, err := client.GetAll("2.0/foo")
+	if err != nil {
+		t.Fatalf("GetAll returned error: %v", err)
+	}
+	body, _ := io.ReadAll(res.Body)
+	got := string(body)
+	want := `{"values":[{"n":1},{"n":2},{"n":3}]}`
+	if got != want {
+		t.Errorf("GetAll merged body mismatch:\n got: %s\nwant: %s", got, want)
+	}
+}
 
 func TestRetryAfterDelay(t *testing.T) {
 	// Honour Retry-After header when present.

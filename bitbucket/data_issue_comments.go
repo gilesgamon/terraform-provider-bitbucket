@@ -83,7 +83,7 @@ func dataIssueCommentsRead(ctx context.Context, d *schema.ResourceData, m interf
 	url := fmt.Sprintf("2.0/repositories/%s/%s/issues/%s/comments", workspace, repoSlug, issueID)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

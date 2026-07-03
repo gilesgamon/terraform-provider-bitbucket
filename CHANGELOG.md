@@ -1,5 +1,9 @@
 ## Unreleased
 
+### ⚡ Pagination
+
+* List/collection data sources now return the **full** result set instead of only the first page (Bitbucket defaults to 10 items per page). A `Client.GetAll` helper transparently follows `next` links, and 59 collection data sources were switched to it. Endpoints that take an explicit `page` argument (e.g. code search) are intentionally left page-by-page.
+
 ### ⚡ Client
 
 * The API client now sends a `User-Agent` header (`terraform-provider-bitbucket/<version>`), with the version injected at build time.

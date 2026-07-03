@@ -38,7 +38,7 @@ func dataWorkspacePipelineRunnersRead(ctx context.Context, d *schema.ResourceDat
 	url := fmt.Sprintf("2.0/workspaces/%s/pipelines-config/runners", workspace)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

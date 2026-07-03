@@ -102,7 +102,7 @@ func dataCommitPullrequestsRead(ctx context.Context, d *schema.ResourceData, m i
 	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/pullrequests", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

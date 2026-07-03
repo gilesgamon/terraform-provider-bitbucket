@@ -84,7 +84,7 @@ func dataRepositoryDeploymentChangesRead(ctx context.Context, d *schema.Resource
 	url := fmt.Sprintf("2.0/repositories/%s/%s/environments/%s/changes", workspace, repoSlug, environmentUUID)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

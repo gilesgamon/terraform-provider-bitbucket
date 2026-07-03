@@ -76,7 +76,7 @@ func dataRepositoryPipelineSSHKeysRead(ctx context.Context, d *schema.ResourceDa
 	url := fmt.Sprintf("2.0/repositories/%s/%s/pipelines_config/ssh/keys", workspace, repoSlug)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

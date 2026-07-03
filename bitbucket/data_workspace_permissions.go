@@ -73,7 +73,7 @@ func dataWorkspacePermissionsRead(ctx context.Context, d *schema.ResourceData, m
 	url := fmt.Sprintf("2.0/workspaces/%s/permissions", workspace)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}
