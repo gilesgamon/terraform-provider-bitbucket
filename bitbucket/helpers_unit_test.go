@@ -1,9 +1,28 @@
 package bitbucket
 
 import (
+	"net/http"
 	"reflect"
 	"testing"
+	"time"
 )
+
+func TestRetryAfterDelay(t *testing.T) {
+	// Honour Retry-After header when present.
+	resp := &http.Response{Header: http.Header{"Retry-After": []string{"5"}}}
+	if got := retryAfterDelay(resp, 0); got != 5*time.Second {
+		t.Errorf("with Retry-After=5 want 5s, got %s", got)
+	}
+
+	// Fall back to exponential backoff otherwise.
+	empty := &http.Response{Header: http.Header{}}
+	if got := retryAfterDelay(empty, 0); got != retryBaseDelay {
+		t.Errorf("attempt 0 want %s, got %s", retryBaseDelay, got)
+	}
+	if got := retryAfterDelay(empty, 2); got != 4*retryBaseDelay {
+		t.Errorf("attempt 2 want %s, got %s", 4*retryBaseDelay, got)
+	}
+}
 
 func TestToRelativeEndpoint(t *testing.T) {
 	cases := []struct {
