@@ -1,3 +1,34 @@
+## Unreleased
+
+### ✨ New Endpoints (latest Bitbucket Cloud API sync)
+
+Synced the vendored OpenAPI reference (`reference/swagger.v3.json`) with the
+latest Bitbucket Cloud API and implemented the newly added endpoints.
+
+#### New Data Sources
+
+* **Pipeline Runners**: `bitbucket_workspace_pipeline_runners`, `bitbucket_workspace_pipeline_runner`, `bitbucket_repository_pipeline_runners`, `bitbucket_repository_pipeline_runner`
+* **Merge Conflicts**: `bitbucket_file_conflicts`, `bitbucket_pull_request_conflicts`
+* **User Workspace Access**: `bitbucket_user_workspaces`, `bitbucket_user_workspace_permission`, `bitbucket_user_workspace_repository_permissions`
+* **Connect Add-on**: `bitbucket_addon_client_key`
+* **Workspace GPG**: `bitbucket_workspace_gpg_public_key`
+
+#### New Resources
+
+* **Pipeline Runners**: `bitbucket_workspace_pipeline_runner`, `bitbucket_repository_pipeline_runner` — manage self-hosted Bitbucket Pipelines runners at the workspace and repository level.
+
+### 🗑️ Deprecated Upstream Endpoints
+
+The following `addon/linkers` endpoints were removed from the upstream Bitbucket
+Cloud API. The `bitbucket_repository_addon_linkers` and
+`bitbucket_repository_addon_values` data sources are retained for backwards
+compatibility but now target endpoints that Atlassian no longer documents:
+
+* `GET /addon/linkers`
+* `GET /addon/linkers/{linker_key}`
+* `GET|POST|PUT|DELETE /addon/linkers/{linker_key}/values`
+* `GET|DELETE /addon/linkers/{linker_key}/values/{value_id}`
+
 ## 2.0.0 (December 2024)
 
 ### 🎉 Major Release - Complete API Coverage
