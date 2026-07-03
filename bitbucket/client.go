@@ -8,8 +8,23 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
+	"time"
 
 	"golang.org/x/oauth2"
+)
+
+// ProviderVersion is the provider version, set from main at build time. It is
+// used to build the User-Agent header sent with every API request.
+var ProviderVersion = "dev"
+
+const (
+	// maxRetries is the number of times a request is retried when the API
+	// responds with HTTP 429 (rate limited).
+	maxRetries = 3
+	// retryBaseDelay is the base delay used for exponential backoff between
+	// retries when the API does not return a Retry-After header.
+	retryBaseDelay = time.Second
 )
 
 // Error represents a error from the bitbucket api.
@@ -46,53 +61,76 @@ func (c *Client) Do(method, endpoint string, payload *bytes.Buffer, contentType 
 	absoluteendpoint := BitbucketEndpoint + endpoint
 	log.Printf("[DEBUG] Sending request to %s %s", method, absoluteendpoint)
 
-	var bodyreader io.Reader
-
+	// Capture the payload once so the request can be safely rebuilt on retry.
+	var body []byte
 	if payload != nil {
-		log.Printf("[DEBUG] With payload %s", payload.String())
-		bodyreader = payload
+		body = payload.Bytes()
+		log.Printf("[DEBUG] With payload %s", string(body))
 	}
 
-	req, err := http.NewRequest(method, absoluteendpoint, bodyreader)
-	if err != nil {
-		return nil, err
-	}
+	var resp *http.Response
 
-	if c.Username != nil && c.Password != nil {
-		log.Printf("[DEBUG] Setting Basic Auth")
-		req.SetBasicAuth(*c.Username, *c.Password)
-	}
+	for attempt := 0; ; attempt++ {
+		var bodyreader io.Reader
+		if payload != nil {
+			bodyreader = bytes.NewReader(body)
+		}
 
-	if c.OAuthToken != nil {
-		log.Printf("[DEBUG] Setting Bearer Token")
-		bearer := "Bearer " + *c.OAuthToken
-		req.Header.Add("Authorization", bearer)
-	}
-
-	if c.OAuthTokenSource != nil {
-		token, err := c.OAuthTokenSource.Token()
+		req, err := http.NewRequest(method, absoluteendpoint, bodyreader)
 		if err != nil {
 			return nil, err
 		}
 
-		token.SetAuthHeader(req)
+		if c.Username != nil && c.Password != nil {
+			log.Printf("[DEBUG] Setting Basic Auth")
+			req.SetBasicAuth(*c.Username, *c.Password)
+		}
+
+		if c.OAuthToken != nil {
+			log.Printf("[DEBUG] Setting Bearer Token")
+			bearer := "Bearer " + *c.OAuthToken
+			req.Header.Add("Authorization", bearer)
+		}
+
+		if c.OAuthTokenSource != nil {
+			token, err := c.OAuthTokenSource.Token()
+			if err != nil {
+				return nil, err
+			}
+
+			token.SetAuthHeader(req)
+		}
+
+		if payload != nil && contentType != "" {
+			// Can cause bad request when putting default reviews if set.
+			req.Header.Add("Content-Type", contentType)
+		}
+
+		req.Header.Set("User-Agent", "terraform-provider-bitbucket/"+ProviderVersion)
+		req.Close = true
+
+		var doErr error
+		resp, doErr = c.HTTPClient.Do(req)
+		log.Printf("[DEBUG] Resp: %v Err: %v", resp, doErr)
+		if doErr != nil {
+			return nil, doErr
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("no response received from %s %s", method, absoluteendpoint)
+		}
+
+		// Retry on rate limiting, honouring Retry-After when provided.
+		if resp.StatusCode == http.StatusTooManyRequests && attempt < maxRetries {
+			wait := retryAfterDelay(resp, attempt)
+			log.Printf("[DEBUG] Rate limited by Bitbucket, retrying in %s (attempt %d/%d)", wait, attempt+1, maxRetries)
+			resp.Body.Close()
+			time.Sleep(wait)
+			continue
+		}
+
+		break
 	}
 
-	if payload != nil && contentType != "" {
-		// Can cause bad request when putting default reviews if set.
-		req.Header.Add("Content-Type", contentType)
-	}
-
-	req.Close = true
-
-	resp, err := c.HTTPClient.Do(req)
-	log.Printf("[DEBUG] Resp: %v Err: %v", resp, err)
-	if err != nil {
-		return nil, err
-	}
-	if resp == nil {
-		return nil, fmt.Errorf("no response received from %s %s", method, absoluteendpoint)
-	}
 	if resp.StatusCode >= 400 || resp.StatusCode < 200 {
 		apiError := Error{
 			StatusCode: resp.StatusCode,
@@ -114,7 +152,21 @@ func (c *Client) Do(method, endpoint string, payload *bytes.Buffer, contentType 
 		return resp, error(apiError)
 
 	}
-	return resp, err
+	return resp, nil
+}
+
+// retryAfterDelay returns how long to wait before retrying a rate-limited
+// request. It uses the Retry-After response header when present (seconds),
+// otherwise it falls back to exponential backoff.
+func retryAfterDelay(resp *http.Response, attempt int) time.Duration {
+	if resp != nil {
+		if v := resp.Header.Get("Retry-After"); v != "" {
+			if secs, err := strconv.Atoi(v); err == nil && secs >= 0 {
+				return time.Duration(secs) * time.Second
+			}
+		}
+	}
+	return retryBaseDelay * time.Duration(1<<uint(attempt))
 }
 
 // Get is just a helper method to do but with a GET verb
