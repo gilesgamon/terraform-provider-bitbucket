@@ -10,8 +10,8 @@ description: |-
 
 Retrieves the *effective* branching model for a repository — the branching
 model that is actually applied, taking any project-level inheritance into
-account. Use [`bitbucket_branching_model`](branching_model.md) for the
-repository's own configured model.
+account. Use the `bitbucket_branching_model` data source for the repository's
+own configured model.
 
 OAuth2 Scopes: `repository`
 

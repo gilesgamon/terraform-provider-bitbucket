@@ -9,7 +9,7 @@ description: |-
 # bitbucket\_tags
 
 Retrieves the list of Git tags for a repository. Use the singular
-[`bitbucket_tag`](tag.md) data source to look up a single tag by name.
+`bitbucket_tag` data source to look up a single tag by name.
 
 OAuth2 Scopes: `repository`
 
