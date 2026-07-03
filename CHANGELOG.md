@@ -6,6 +6,12 @@
 * `bitbucket_effective_branching_model` - The effective branching model for a repository, including project-level inheritance.
 * `bitbucket_branch_merge_base` - The common ancestor commit between two revisions.
 
+### 📖 Documentation
+
+* Added reference documentation for every registered resource and data source, closing a gap where 88 data sources and 2 resources (including the newer pipeline runner, conflicts, user-workspace, and project deploy key endpoints) had no docs page. List/collection data sources now document their nested item attributes.
+* Added a schema-driven documentation generator under `tools/docgen` to keep `docs/` in sync with the provider schema for future endpoints.
+* Fixed a typo on the provider index page.
+
 ### 🧹 Cleanup
 
 * Removed 73 unused data source implementations that were never registered with the provider. These were either duplicates of existing data sources or targeted endpoints that do not exist in the Bitbucket Cloud API (for example, a fabricated `issue-fields/*` tree, per-step pipeline sub-resources such as `steps/{uuid}/max-seconds`, and an `addons/*/webhooks/*` tree). This removes dead code and the associated linter noise.

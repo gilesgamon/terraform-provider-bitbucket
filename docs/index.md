@@ -74,7 +74,7 @@ The following arguments are supported in the `provider` block:
 
 ## OAuth2 Scopes
 
-To interacte with the Bitbucket API, an [App
+To interact with the Bitbucket API, an [App
 Password](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) or
 [OAuth Client
 Credentials](https://support.atlassian.com/bitbucket-cloud/docs/use-oauth-on-bitbucket-cloud/)
