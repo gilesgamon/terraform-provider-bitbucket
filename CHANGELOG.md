@@ -1,3 +1,9 @@
+## Unreleased
+
+### ✨ New Features
+
+* **Project Deploy Keys** (resolves #1): Added the `bitbucket_project_deploy_key` resource and the `bitbucket_project_deploy_keys` data source, covering the previously unimplemented `/workspaces/{workspace}/projects/{project_key}/deploy-keys` endpoints. Project deploy keys are inherited by all repositories in a project.
+
 ## 2.0.0 (December 2024)
 
 ### 🎉 Major Release - Complete API Coverage
