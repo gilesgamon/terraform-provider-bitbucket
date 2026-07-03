@@ -1,5 +1,10 @@
 ## Unreleased
 
+### ⚡ Client
+
+* The API client now sends a `User-Agent` header (`terraform-provider-bitbucket/<version>`), with the version injected at build time.
+* Requests that are rate limited (HTTP 429) are now retried with backoff, honouring the `Retry-After` header when present.
+
 ### 🧪 CI & Testing
 
 * Added a `Test` GitHub Actions workflow that runs `gofmt`, `go vet`, `go build` and `go test` on every pull request and on pushes to `main`.
