@@ -85,7 +85,7 @@ func dataRepositoryOverrideSettingsRead(ctx context.Context, d *schema.ResourceD
 
 	endpoint := fmt.Sprintf("2.0/repositories/%s/%s/override-settings", workspace, repoSlug)
 
-	res, err := client.Get(endpoint)
+	res, err := client.GetAll(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}

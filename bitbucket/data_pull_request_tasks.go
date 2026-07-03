@@ -102,7 +102,7 @@ func dataPullRequestTasksRead(ctx context.Context, d *schema.ResourceData, m int
 
 	endpoint := fmt.Sprintf("2.0/repositories/%s/%s/pullrequests/%s/tasks", workspace, repoSlug, pullRequestID)
 
-	res, err := client.Get(endpoint)
+	res, err := client.GetAll(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}

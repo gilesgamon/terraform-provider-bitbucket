@@ -73,7 +73,7 @@ func dataRepositoryPullRequestApprovalsRead(ctx context.Context, d *schema.Resou
 	url := fmt.Sprintf("2.0/repositories/%s/%s/pullrequests/%s/approve", workspace, repoSlug, pullRequestID)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

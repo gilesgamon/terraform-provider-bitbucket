@@ -88,7 +88,7 @@ func dataGroupMembersRead(ctx context.Context, d *schema.ResourceData, m interfa
 	url := fmt.Sprintf("2.0/workspaces/%s/groups/%s/members", workspace, groupSlug)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

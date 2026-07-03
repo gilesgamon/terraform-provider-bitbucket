@@ -69,7 +69,7 @@ func dataRepositoryIssueVotesRead(ctx context.Context, d *schema.ResourceData, m
 	url := fmt.Sprintf("2.0/repositories/%s/%s/issues/%s/votes", workspace, repoSlug, issueID)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

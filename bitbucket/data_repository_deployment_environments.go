@@ -87,7 +87,7 @@ func dataRepositoryDeploymentEnvironmentsRead(ctx context.Context, d *schema.Res
 	url := fmt.Sprintf("2.0/repositories/%s/%s/environments", workspace, repoSlug)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

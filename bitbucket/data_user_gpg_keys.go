@@ -104,7 +104,7 @@ func dataUserGpgKeysRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 	endpoint := fmt.Sprintf("2.0/users/%s/gpg-keys", selectedUser)
 
-	res, err := client.Get(endpoint)
+	res, err := client.GetAll(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}

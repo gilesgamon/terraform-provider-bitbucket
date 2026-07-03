@@ -86,7 +86,7 @@ func dataUserWorkspaceRepositoryPermissionsRead(ctx context.Context, d *schema.R
 	}
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

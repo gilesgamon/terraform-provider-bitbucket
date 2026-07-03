@@ -88,7 +88,7 @@ func dataRepositoryDefaultReviewersRead(ctx context.Context, d *schema.ResourceD
 	url := fmt.Sprintf("2.0/repositories/%s/%s/default-reviewers", workspace, repoSlug)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

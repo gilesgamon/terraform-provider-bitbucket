@@ -89,7 +89,7 @@ func dataWebhooksRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	url := fmt.Sprintf("2.0/workspaces/%s/hooks", workspace)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

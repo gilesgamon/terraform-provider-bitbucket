@@ -102,7 +102,7 @@ func dataRepositoryPullRequestCommentsRead(ctx context.Context, d *schema.Resour
 	url := fmt.Sprintf("2.0/repositories/%s/%s/pullrequests/%s/comments", workspace, repoSlug, pullRequestID)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -93,7 +93,7 @@ func dataCommitStatusesRead(ctx context.Context, d *schema.ResourceData, m inter
 	url := fmt.Sprintf("2.0/repositories/%s/%s/commits/%s/statuses", workspace, repoSlug, commit)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	res, err := client.GetAll(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}

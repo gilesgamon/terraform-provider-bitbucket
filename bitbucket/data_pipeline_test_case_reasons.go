@@ -90,7 +90,7 @@ func dataPipelineTestCaseReasonsRead(ctx context.Context, d *schema.ResourceData
 
 	endpoint := fmt.Sprintf("2.0/repositories/%s/%s/pipelines/%s/steps/%s/test_reports/test_cases/%s/test_case_reasons", workspace, repoSlug, pipelineUUID, stepUUID, testCaseUUID)
 
-	res, err := client.Get(endpoint)
+	res, err := client.GetAll(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -52,7 +52,7 @@ func dataUserEmailsRead(ctx context.Context, d *schema.ResourceData, m interface
 
 	endpoint := "2.0/user/emails"
 
-	res, err := client.Get(endpoint)
+	res, err := client.GetAll(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
