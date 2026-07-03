@@ -163,4 +163,3 @@ type OverrideSetting struct {
 type OverrideSettingLinks struct {
 	Self Link `json:"self"`
 }
-

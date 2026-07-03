@@ -299,4 +299,3 @@ func dataTeamSearchCodeRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	return nil
 }
-

@@ -152,4 +152,3 @@ func dataPullRequestTaskRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	return nil
 }
-

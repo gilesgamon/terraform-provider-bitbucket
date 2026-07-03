@@ -264,4 +264,3 @@ func userGpgKeyId(id string) (selectedUser, fingerprint string, err error) {
 type GpgKeyRequest struct {
 	Key string `json:"key"`
 }
-

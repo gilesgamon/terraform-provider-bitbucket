@@ -177,4 +177,3 @@ type PullRequestTask struct {
 	UpdatedOn string   `json:"updated_on"`
 	Creator   *Account `json:"creator,omitempty"`
 }
-

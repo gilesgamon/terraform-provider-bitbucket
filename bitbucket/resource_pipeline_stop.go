@@ -91,4 +91,3 @@ func resourcePipelineStopDelete(ctx context.Context, d *schema.ResourceData, m i
 	d.SetId("")
 	return nil
 }
-

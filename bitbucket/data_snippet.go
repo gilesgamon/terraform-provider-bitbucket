@@ -227,4 +227,3 @@ func dataSnippetRead(ctx context.Context, d *schema.ResourceData, m interface{})
 
 	return nil
 }
-

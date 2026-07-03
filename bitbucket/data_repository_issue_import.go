@@ -108,4 +108,3 @@ type IssueImport struct {
 	CreatedOn string `json:"created_on"`
 	UpdatedOn string `json:"updated_on"`
 }
-
