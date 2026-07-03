@@ -99,8 +99,8 @@ func flattenAccounts(flattenAccounts []bitbucket.Account) []interface{} {
 
 		flattenAccounts := map[string]interface{}{
 			"uuid":         account.Uuid,
-			"username":     account.DisplayName,
-			"display_name": account.Username,
+			"username":     account.Username,
+			"display_name": account.DisplayName,
 		}
 
 		tfList = append(tfList, flattenAccounts)

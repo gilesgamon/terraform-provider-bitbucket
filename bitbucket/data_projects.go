@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -84,72 +82,30 @@ func dataProjectsRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataProjectsRead", dumpResourceData(d, dataProjects().Schema))
 
-	url := fmt.Sprintf("2.0/workspaces/%s/projects", workspace)
-
-	// Build query parameters
 	params := make(map[string]string)
 	if q, ok := d.GetOk("q"); ok {
 		params["q"] = q.(string)
 	}
-
-	// Add query parameters to URL
-	if len(params) > 0 {
-		url += "?"
-		first := true
-		for key, value := range params {
-			if !first {
-				url += "&"
-			}
-			url += fmt.Sprintf("%s=%s", key, value)
-			first = false
-		}
-	}
+	url := fmt.Sprintf("2.0/workspaces/%s/projects", workspace) + encodeQueryParams(params)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	rawValues, err := client.GetPaginated(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if res == nil {
-		return diag.Errorf("no response returned from projects call. Make sure your credentials are accurate.")
-	}
 
-	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate workspace %s", workspace)
-	}
-
-	if res.Body == nil {
-		return diag.Errorf("error reading projects with params (%s): ", dumpResourceData(d, dataProjects().Schema))
-	}
-
-	if err := handleClientError(res, err); err != nil {
-		return diag.FromErr(err)
-	}
-
-	projectsBody, readerr := io.ReadAll(res.Body)
-	if readerr != nil {
-		return diag.FromErr(readerr)
-	}
-	log.Printf("[DEBUG] http response: %v", res)
-	log.Printf("[DEBUG] projects response: %v", projectsBody)
-
-	var projectsResponse ProjectsResponse
-	decodeerr := json.Unmarshal(projectsBody, &projectsResponse)
-	if decodeerr != nil {
-		return diag.FromErr(decodeerr)
+	projects := make([]Project, 0, len(rawValues))
+	for _, raw := range rawValues {
+		var project Project
+		if decodeerr := json.Unmarshal(raw, &project); decodeerr != nil {
+			return diag.FromErr(decodeerr)
+		}
+		projects = append(projects, project)
 	}
 
 	d.SetId(fmt.Sprintf("%s/projects", workspace))
-	flattenProjects(&projectsResponse, d)
+	flattenProjects(projects, d)
 	return nil
-}
-
-// ProjectsResponse represents the response from the projects API
-type ProjectsResponse struct {
-	Values []Project `json:"values"`
-	Page   int       `json:"page"`
-	Size   int       `json:"size"`
-	Next   string    `json:"next"`
 }
 
 // Project represents a project in a workspace
@@ -166,13 +122,9 @@ type Project struct {
 }
 
 // Flattens the projects information
-func flattenProjects(c *ProjectsResponse, d *schema.ResourceData) {
-	if c == nil {
-		return
-	}
-
-	projects := make([]interface{}, len(c.Values))
-	for i, project := range c.Values {
+func flattenProjects(values []Project, d *schema.ResourceData) {
+	projects := make([]interface{}, len(values))
+	for i, project := range values {
 		projects[i] = map[string]interface{}{
 			"uuid":        project.UUID,
 			"key":         project.Key,

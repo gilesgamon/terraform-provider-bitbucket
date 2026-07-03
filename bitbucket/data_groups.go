@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -84,72 +82,30 @@ func dataGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) 
 
 	log.Printf("[DEBUG]: params for %s: %v", "dataGroupsRead", dumpResourceData(d, dataGroups().Schema))
 
-	url := fmt.Sprintf("2.0/workspaces/%s/groups", workspace)
-
-	// Build query parameters
 	params := make(map[string]string)
 	if q, ok := d.GetOk("q"); ok {
 		params["q"] = q.(string)
 	}
-
-	// Add query parameters to URL
-	if len(params) > 0 {
-		url += "?"
-		first := true
-		for key, value := range params {
-			if !first {
-				url += "&"
-			}
-			url += fmt.Sprintf("%s=%s", key, value)
-			first = false
-		}
-	}
+	url := fmt.Sprintf("2.0/workspaces/%s/groups", workspace) + encodeQueryParams(params)
 
 	client := m.(Clients).httpClient
-	res, err := client.Get(url)
+	rawValues, err := client.GetPaginated(url)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if res == nil {
-		return diag.Errorf("no response returned from groups call. Make sure your credentials are accurate.")
-	}
 
-	if res.StatusCode == http.StatusNotFound {
-		return diag.Errorf("unable to locate workspace %s", workspace)
-	}
-
-	if res.Body == nil {
-		return diag.Errorf("error reading groups with params (%s): ", dumpResourceData(d, dataGroups().Schema))
-	}
-
-	if err := handleClientError(res, err); err != nil {
-		return diag.FromErr(err)
-	}
-
-	groupsBody, readerr := io.ReadAll(res.Body)
-	if readerr != nil {
-		return diag.FromErr(readerr)
-	}
-	log.Printf("[DEBUG] http response: %v", res)
-	log.Printf("[DEBUG] groups response: %v", groupsBody)
-
-	var groupsResponse GroupsResponse
-	decodeerr := json.Unmarshal(groupsBody, &groupsResponse)
-	if decodeerr != nil {
-		return diag.FromErr(decodeerr)
+	groups := make([]GroupData, 0, len(rawValues))
+	for _, raw := range rawValues {
+		var group GroupData
+		if decodeerr := json.Unmarshal(raw, &group); decodeerr != nil {
+			return diag.FromErr(decodeerr)
+		}
+		groups = append(groups, group)
 	}
 
 	d.SetId(fmt.Sprintf("%s/groups", workspace))
-	flattenGroups(&groupsResponse, d)
+	flattenGroups(groups, d)
 	return nil
-}
-
-// GroupsResponse represents the response from the groups API
-type GroupsResponse struct {
-	Values []GroupData `json:"values"`
-	Page   int         `json:"page"`
-	Size   int         `json:"size"`
-	Next   string      `json:"next"`
 }
 
 // GroupData represents a group in a workspace from data source
@@ -166,13 +122,9 @@ type GroupData struct {
 }
 
 // Flattens the groups information
-func flattenGroups(c *GroupsResponse, d *schema.ResourceData) {
-	if c == nil {
-		return
-	}
-
-	groups := make([]interface{}, len(c.Values))
-	for i, group := range c.Values {
+func flattenGroups(values []GroupData, d *schema.ResourceData) {
+	groups := make([]interface{}, len(values))
+	for i, group := range values {
 		groups[i] = map[string]interface{}{
 			"uuid":        group.UUID,
 			"name":        group.Name,

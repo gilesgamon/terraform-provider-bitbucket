@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 
 	"golang.org/x/oauth2"
 )
@@ -86,6 +87,12 @@ func (c *Client) Do(method, endpoint string, payload *bytes.Buffer, contentType 
 
 	resp, err := c.HTTPClient.Do(req)
 	log.Printf("[DEBUG] Resp: %v Err: %v", resp, err)
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, fmt.Errorf("no response received from %s %s", method, absoluteendpoint)
+	}
 	if resp.StatusCode >= 400 || resp.StatusCode < 200 {
 		apiError := Error{
 			StatusCode: resp.StatusCode,
@@ -113,6 +120,81 @@ func (c *Client) Do(method, endpoint string, payload *bytes.Buffer, contentType 
 // Get is just a helper method to do but with a GET verb
 func (c *Client) Get(endpoint string) (*http.Response, error) {
 	return c.Do("GET", endpoint, nil, "application/json")
+}
+
+// GetPaginated retrieves every page of a paginated Bitbucket 2.0 collection
+// endpoint by following the `next` links, returning the concatenated `values`
+// entries as raw JSON messages. Bitbucket collection endpoints default to a
+// small page size (10), so callers that need the full result set must paginate.
+func (c *Client) GetPaginated(endpoint string) ([]json.RawMessage, error) {
+	var values []json.RawMessage
+	next := endpoint
+
+	for next != "" {
+		res, err := c.Get(next)
+		if err != nil {
+			return nil, err
+		}
+
+		body, err := io.ReadAll(res.Body)
+		res.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		var page struct {
+			Values []json.RawMessage `json:"values"`
+			Next   string            `json:"next"`
+		}
+		if err := json.Unmarshal(body, &page); err != nil {
+			return nil, err
+		}
+
+		values = append(values, page.Values...)
+		next = toRelativeEndpoint(page.Next)
+	}
+
+	return values, nil
+}
+
+// toRelativeEndpoint converts an absolute Bitbucket API URL (as returned in the
+// `next` field of paginated responses) into an endpoint relative to
+// BitbucketEndpoint, which is what Client.Do expects.
+func toRelativeEndpoint(raw string) string {
+	if raw == "" {
+		return ""
+	}
+
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return ""
+	}
+
+	rel := parsed.Path
+	for len(rel) > 0 && rel[0] == '/' {
+		rel = rel[1:]
+	}
+	if parsed.RawQuery != "" {
+		rel += "?" + parsed.RawQuery
+	}
+	return rel
+}
+
+// encodeQueryParams builds a deterministic, URL-encoded query string (including
+// the leading "?") from the provided parameters. It returns an empty string when
+// there are no parameters. Using url.Values ensures keys are sorted and values
+// are escaped, avoiding malformed requests when values contain spaces or special
+// characters (common in Bitbucket query language filters).
+func encodeQueryParams(params map[string]string) string {
+	if len(params) == 0 {
+		return ""
+	}
+
+	values := url.Values{}
+	for k, v := range params {
+		values.Set(k, v)
+	}
+	return "?" + values.Encode()
 }
 
 // Post is just a helper method to do but with a POST verb
