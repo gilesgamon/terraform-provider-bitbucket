@@ -1,5 +1,12 @@
 ## Unreleased
 
+### 📦 Project
+
+* Rewrote the README with accurate resource/data-source counts, authentication guidance and examples.
+* Added `CONTRIBUTING.md`, `ROADMAP.md`, issue templates and a pull request template.
+* Added runnable configurations under `examples/`, a `terraform-registry-manifest.json`, and a `.go-version` file.
+* Removed internal work-log documents from the repository root.
+
 ### ✨ New Data Sources
 
 * `bitbucket_tags` - List all Git tags in a repository (complements the singular `bitbucket_tag`).

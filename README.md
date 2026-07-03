@@ -1,535 +1,102 @@
-# 🎉 **Terraform Provider for Bitbucket - 100% Complete!** 🎉
-
-## 🏆 **Status: Production Ready**
-
-**All 178 Bitbucket API endpoints have been successfully implemented!**
-
-- ✅ **Data Sources**: 86/86 (100%)
-- ✅ **Resources**: 92/92 (100%)
-- ✅ **Total Coverage**: 178/178 (100%)
-
----
-
-# Bitbucket Terraform Provider
+# Terraform Provider for Bitbucket Cloud
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/gilesgamon/terraform-provider-bitbucket)](https://goreportcard.com/report/github.com/gilesgamon/terraform-provider-bitbucket)
-[![GoDoc](https://godoc.org/github.com/gilesgamon/terraform-provider-bitbucket?status.svg)](https://godoc.org/github.com/gilesgamon/terraform-provider-bitbucket)
-[![License](https://img.shields.io/github/license/gilesgamon/terraform-provider-bitbucket.svg)](https://github.com/gilesgamon/terraform-provider-bitbucket/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/gilesgamon/terraform-provider-bitbucket.svg)](LICENSE)
 
-The Bitbucket Terraform Provider enables you to manage your Bitbucket Cloud resources using Terraform. This provider offers comprehensive coverage of Bitbucket's API, including repositories, pipelines, issues, and advanced Git operations.
+Manage [Bitbucket Cloud](https://bitbucket.org) resources — repositories,
+projects, pipelines, deploy keys, webhooks, permissions and more — with
+Terraform.
 
-## 🚀 Features
+- **Resources:** 32
+- **Data sources:** 121
+- **Terraform SDK:** [terraform-plugin-sdk v2](https://github.com/hashicorp/terraform-plugin-sdk)
 
-### ✅ **Core Repository & Git Operations (100% Complete)**
-- **Repository Management**: Create, update, and manage repositories
-- **Branch Operations**: Manage branches, restrictions, and branching models
-- **Tag Management**: Handle Git tags and releases
-- **Commit Operations**: Access commit details, properties, reports, and approvals
-- **Pull Request Management**: Comprehensive PR lifecycle management
-- **Pipeline Integration**: CI/CD pipeline management and monitoring
+> The provider tracks the Bitbucket Cloud REST API. The vendored OpenAPI
+> specification used as the source of truth lives in
+> [`reference/swagger.v3.json`](reference/swagger.v3.json).
 
-### ✅ **Advanced Repository Features (100% Complete)**
-- **Issue Tracking**: Complete issue management system with import/export
-- **Repository Settings**: Configuration, permissions, and override settings
-- **Webhook Management**: Event-driven integrations
-- **Deploy Keys**: SSH key management for deployments
-- **Code Search**: Advanced search capabilities across workspaces and users
+## Requirements
 
-### ✅ **Pipeline & CI/CD (100% Complete)**
-- **Build Management**: Pipeline runs, steps, logs, and build numbers
-- **Environment Configuration**: Deployment environments and variables
-- **Test Reports**: Automated testing, test cases, and failure analysis
-- **Pipeline Control**: Start, stop, and manage pipeline executions
-- **Schedule Management**: Pipeline scheduling and execution tracking
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
+- [Go](https://go.dev/doc/install) >= 1.23 (only to build from source)
 
-### ✅ **Workspace & Project Management (100% Complete)**
-- **Team Management**: Workspace and project organization
-- **Permission Management**: Access control and security
-- **Variable Management**: Environment, repository, and team variables
-- **User Management**: GPG keys, emails, and user profiles
-
-### ✅ **Code Snippets & Advanced Features (100% Complete)**
-- **Snippet Management**: Create, read, update, and delete code snippets
-- **GPG Key Management**: User GPG key management
-- **Pull Request Tasks**: Advanced PR task management and merge status
-- **Repository Components**: Version management and component tracking
-
-## 📋 Requirements
-
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.19 (for building from source)
-
-## 🔧 Installation
-
-### Using Terraform Registry (Recommended)
+## Installation
 
 ```hcl
 terraform {
   required_providers {
     bitbucket = {
       source  = "gilesgamon/terraform-provider-bitbucket"
-      version = "0.0.1"
+      version = "~> 0.1"
     }
   }
 }
 ```
 
-### Building from Source
+## Authentication
 
-```bash
-git clone https://github.com/gilesgamon/terraform-provider-bitbucket.git
-cd bitbucket
-go build -o terraform-provider-bitbucket .
-```
-
-## ⚙️ Provider Configuration
-
-### Basic Authentication
+The provider supports three authentication methods. Configure exactly one.
 
 ```hcl
+# 1. Username + App Password
 provider "bitbucket" {
-  username = "your-username"
-  password = "your-password-or-app-password"
+  username = "my-user"
+  password = "my-app-password" # https://bitbucket.org/account/settings/app-passwords/
 }
-```
 
-### App Password (Recommended)
-
-```hcl
+# 2. OAuth 2.0 Client Credentials
 provider "bitbucket" {
-  username = "your-username"
-  password = "your-app-password"
+  oauth_client_id     = "..."
+  oauth_client_secret = "..."
 }
-```
 
-### OAuth2 (Advanced)
-
-#### OAuth Client Credentials Flow
-```hcl
+# 3. OAuth 2.0 Access Token
 provider "bitbucket" {
-  oauth_client_id     = "your-client-id"
-  oauth_client_secret = "your-client-secret"
+  oauth_token = "..."
 }
 ```
 
+Every option can also be supplied via environment variables:
+`BITBUCKET_USERNAME`, `BITBUCKET_PASSWORD`, `BITBUCKET_OAUTH_CLIENT_ID`,
+`BITBUCKET_OAUTH_CLIENT_SECRET`, and `BITBUCKET_OAUTH_TOKEN`.
 
-Create a 'Consumer' by navigating: 'Workspace settings'->'OAuth consumers'->'Add consumer'
+Each resource and data source documents the OAuth2 scopes it requires.
 
-![Add Consumer](./images/AddConsumer.png)
-
-For 'Callback URL' use "urn:ietf:wg:oauth:2.0:oob". The rest of the settins at your discretion but you need to grant sufficient 'scopes' for the work required. Here's an example error when attempting to plan without "repository:admin", which was required for the task I was attempting to complete. You cannot edit but must re-create if 'scopes' do not meet your needs.
-
-```
-│ Error: 403 Forbidden: {"type": "error", "error": {"message": "Your credentials lack one or more required privilege scopes.", "detail": {"required": ["repository:admin"], "granted": ["runner:write", "pipeline:variable", "webhook", "snippet:write", "wiki", "issue:write", "pullrequest:write", "project", "team"]}}}
-```
-
-![Details For Consumer](./images/DetailsForConsumer.png)
-
-Once saved, you should be able to access the secrets, using the '> terraform' in my example as follows;
-
-![OAuth Secrets](./images/OAuthSecrets.png)
-
-The 'Key' is the 'client_id' and 'Secret' is 'client_secret'. Which we're going to save like this;
-
-```
- {
-	"oauth_client_id" :"ytsm12345678912345",
-	"oauth_client_secret" : "Gqxxxxxxxxx11111111112222222222y"
-}
-```
-
-Store a JSON object in AWS Secrets Manager (again suggest stick to build account) named `bitbucket-oauth-suffix` with keys `oauth_client_id` and `oauth_client_secret`, then configure the provider as follows:
+## Example
 
 ```hcl
-provider "aws" {
-  region = "eu-west-2"
+resource "bitbucket_project" "infra" {
+  owner = "my-workspace"
+  name  = "Infrastructure"
+  key   = "INFRA"
 }
 
-data "aws_secretsmanager_secret_version" "bitbucket_oauth" {
-  secret_id = "bitbucket-oauth-suffix"
+resource "bitbucket_repository" "app" {
+  owner       = "my-workspace"
+  name        = "app"
+  project_key = bitbucket_project.infra.key
+  is_private  = true
 }
 
-provider "bitbucket" {
-  oauth_client_id     = jsondecode(data.aws_secretsmanager_secret_version.bitbucket_oauth.secret_string)["oauth_client_id"]
-  oauth_client_secret = jsondecode(data.aws_secretsmanager_secret_version.bitbucket_oauth.secret_string)["oauth_client_secret"]
-}
-```
-
-
-#### OAuth Token (Direct)
-```hcl
-provider "bitbucket" {
-  oauth_token = "your-oauth-token"
+data "bitbucket_tags" "app" {
+  workspace = "my-workspace"
+  repo_slug = bitbucket_repository.app.name
 }
 ```
 
-#### Environment Variables
-```bash
-# OAuth Client Credentials
-export BITBUCKET_OAUTH_CLIENT_ID="your-client-id"
-export BITBUCKET_OAUTH_CLIENT_SECRET="your-client-secret"
+More runnable configurations live under [`examples/`](examples/).
 
-# Or OAuth Token
-export BITBUCKET_OAUTH_TOKEN="your-oauth-token"
+## Documentation
 
-# Or Username/Password
-export BITBUCKET_USERNAME="your-username"
-export BITBUCKET_PASSWORD="your-app-password"
-```
+Reference documentation for every resource and data source is under
+[`docs/`](docs/) and is published on the
+[Terraform Registry](https://registry.terraform.io/providers/gilesgamon/terraform-provider-bitbucket/latest/docs).
 
-## 📚 Data Sources
+## Contributing
 
-### Repository & Git Operations
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to
+build, test, and submit changes, and [ROADMAP.md](ROADMAP.md) for planned work.
 
-#### Get Repository Information
-```hcl
-data "bitbucket_repository" "main" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-}
+## License
 
-output "repo_name" {
-  value = data.bitbucket_repository.main.name
-}
-```
-
-#### Get Commit Details
-```hcl
-data "bitbucket_commit" "latest" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  commit_sha = "abc123..."
-}
-
-output "commit_author" {
-  value = data.bitbucket_commit.latest.author
-}
-```
-
-#### Get Branch Information
-```hcl
-data "bitbucket_branch" "main" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  branch_name = "main"
-}
-
-output "latest_commit" {
-  value = data.bitbucket_branch.main.target.hash
-}
-```
-
-#### Get Tag Information
-```hcl
-data "bitbucket_tag" "release" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  tag_name = "v1.0.0"
-}
-
-output "tag_commit" {
-  value = data.bitbucket_tag.release.target.hash
-}
-```
-
-#### Get Pull Request Details
-```hcl
-data "bitbucket_pull_request" "feature" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  pull_request_id = "123"
-}
-
-output "pr_title" {
-  value = data.bitbucket_pull_request.feature.title
-}
-```
-
-#### Get Pipeline Information
-```hcl
-data "bitbucket_pipeline" "build" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  pipeline_number = "456"
-}
-
-output "pipeline_state" {
-  value = data.bitbucket_pipeline.build.state.name
-}
-```
-
-### Advanced Git Operations
-
-#### Get Commit Comments
-```hcl
-data "bitbucket_commit_comments" "feedback" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  commit_sha = "abc123..."
-}
-
-output "comment_count" {
-  value = length(data.bitbucket_commit_comments.feedback.comments)
-}
-```
-
-#### Get Commit Statuses
-```hcl
-data "bitbucket_commit_statuses" "checks" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  commit_sha = "abc123..."
-}
-
-output "status_count" {
-  value = length(data.bitbucket_commit_statuses.checks.statuses)
-}
-```
-
-#### Get Commit Properties
-```hcl
-data "bitbucket_commit_properties" "metadata" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  commit_sha = "abc123..."
-  app_key = "my-app"
-}
-
-output "property_count" {
-  value = length(data.bitbucket_commit_properties.metadata.properties)
-}
-```
-
-#### Get Commit Reports
-```hcl
-data "bitbucket_commit_reports" "quality" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  commit_sha = "abc123..."
-}
-
-output "report_count" {
-  value = length(data.bitbucket_commit_reports.quality.reports)
-}
-```
-
-#### Get Commits List
-```hcl
-data "bitbucket_commits" "recent" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  branch = "main"
-}
-
-output "recent_commits" {
-  value = [for commit in data.bitbucket_commits.recent.commits : commit.hash]
-}
-```
-
-#### Get Commit Diff
-```hcl
-data "bitbucket_commit_diff" "changes" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  commit_sha = "abc123..."
-  context = 3
-}
-
-output "files_changed" {
-  value = length(data.bitbucket_commit_diff.changes.diff)
-}
-```
-
-#### Get Commit Diff Statistics
-```hcl
-data "bitbucket_commit_diffstat" "stats" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  commit_sha = "abc123..."
-}
-
-output "lines_added" {
-  value = data.bitbucket_commit_diffstat.stats.summary["total_added"]
-}
-```
-
-### Issue Management
-
-#### Get Issues List
-```hcl
-data "bitbucket_issues" "bugs" {
-  workspace = "myworkspace"
-  repo_slug = "my-repo"
-  state = "open"
-  kind = "bug"
-  priority = "major"
-}
-
-output "open_bugs" {
-  value = [for issue in data.bitbucket_issues.bugs.issues : issue.title]
-}
-```
-
-## 🏗️ Resources
-
-### Repository Management
-
-```hcl
-resource "bitbucket_repository" "infrastructure" {
-  workspace = "myworkspace"
-  name     = "terraform-infrastructure"
-  project_key = "INFRA"
-
-  is_private = true
-  fork_policy = "allow_forks"
-
-  description = "Infrastructure as Code repository"
-}
-```
-
-### Project Management
-
-```hcl
-resource "bitbucket_project" "infrastructure" {
-  workspace = "myworkspace"
-  name     = "Infrastructure"
-  key      = "INFRA"
-
-  description = "Infrastructure and DevOps projects"
-  is_private = true
-}
-```
-
-### Pipeline Configuration
-
-```hcl
-resource "bitbucket_pipeline_variable" "environment" {
-  workspace = "myworkspace"
-  repository = "my-repo"
-  key = "ENVIRONMENT"
-  value = "production"
-  secured = false
-}
-```
-
-## 🔄 Usage Examples
-
-### Complete CI/CD Pipeline Setup
-
-```hcl
-# Get repository information
-data "bitbucket_repository" "app" {
-  workspace = "myworkspace"
-  repo_slug = "my-application"
-}
-
-# Get latest commit from main branch
-data "bitbucket_branch" "main" {
-  workspace = "myworkspace"
-  repo_slug = "my-application"
-  branch_name = "main"
-}
-
-# Get pipeline information
-data "bitbucket_pipeline" "latest" {
-  workspace = "myworkspace"
-  repo_slug = "my-application"
-  pipeline_number = "latest"
-}
-
-# Output pipeline metadata
-output "pipeline_info" {
-  value = {
-    repository = data.bitbucket_repository.app.name
-    latest_commit = data.bitbucket_branch.main.target.hash
-    pipeline_state = data.bitbucket_pipeline.latest.state.name
-    pipeline_created = data.bitbucket_pipeline.latest.created_on
-  }
-}
-```
-
-### Issue Tracking Integration
-
-```hcl
-# Get all open issues
-data "bitbucket_issues" "open_issues" {
-  workspace = "myworkspace"
-  repo_slug = "my-application"
-  state = "open"
-}
-
-# Get high-priority bugs
-data "bitbucket_issues" "critical_bugs" {
-  workspace = "myworkspace"
-  repo_slug = "my-application"
-  state = "open"
-  kind = "bug"
-  priority = "critical"
-}
-
-output "issue_summary" {
-  value = {
-    total_open = length(data.bitbucket_issues.open_issues.issues)
-    critical_bugs = length(data.bitbucket_issues.critical_bugs.issues)
-  }
-}
-```
-
-## 🧪 Testing
-
-### Run Unit Tests
-```bash
-go test ./...
-```
-
-### Run Acceptance Tests
-```bash
-export TF_ACC=1
-go test -v -timeout 120m ./...
-```
-
-## 📖 Documentation
-
-### API Reference
-- **Complete API Coverage**: This provider implements all 178 endpoints from the Bitbucket API v3 specification
-- **Swagger Specification**: The complete API specification is available in [`reference/swagger.v3.json`](reference/swagger.v3.json)
-- **Terraform Registry**: Detailed documentation for each data source and resource is available on the [Terraform Registry](https://registry.terraform.io/providers/gilesgamon/terraform-provider-bitbucket/latest/docs)
-
-### Recent Updates
-- **Version 2.0.0**: Complete API coverage with 178 endpoints
-- **Bug Fixes**: Resolved critical nil pointer dereference issues
-- **OAuth Support**: Full OAuth 2.0 client credentials flow implementation
-- **New Features**: Snippets, GPG keys, code search, and advanced pipeline management
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-1. Fork the repository
-2. Clone your fork
-3. Install dependencies: `go mod download`
-4. Make your changes
-5. Run tests: `go test ./...`
-6. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Issues**: [GitHub Issues](https://github.com/gilesgamon/terraform-provider-bitbucket/issues)
-- **Documentation**: [Terraform Registry](https://registry.terraform.io/providers/gilesgamon/bitbucket/latest/docs)
-- **Discussions**: [GitHub Discussions](https://github.com/gilesgamon/terraform-provider-bitbucket/discussions)
-
-## 🔗 Related Links
-
-- [Terraform Documentation](https://www.terraform.io/docs)
-- [Bitbucket API Documentation](https://developer.atlassian.com/cloud/bitbucket/rest/)
-- [Terraform Provider Development](https://www.terraform.io/docs/extend/index.html)
-
----
-
-**Made with ❤️ by the Terraform community**
+Mozilla Public License 2.0 — see [LICENSE](LICENSE).

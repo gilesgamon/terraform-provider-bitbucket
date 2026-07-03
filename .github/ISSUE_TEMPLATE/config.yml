@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Bitbucket Cloud REST API documentation
+    url: https://developer.atlassian.com/cloud/bitbucket/rest/
+    about: Reference for the underlying Bitbucket Cloud API.
