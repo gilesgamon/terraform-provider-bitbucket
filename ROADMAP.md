@@ -5,14 +5,16 @@ reprioritised.
 
 ## In progress
 
-- **Full pagination coverage.** A reusable `Client.GetPaginated` helper exists
-  and is used by the core collection data sources. It is being rolled out to the
-  remaining list data sources so they return the complete result set rather than
-  only the first page.
 - **Correct nested-object attributes.** Some data sources model nested API
   objects (`links`, `target`, `owner`, ...) as `TypeMap` of strings, which
   silently drops nested values. These are being migrated to typed nested blocks
   or JSON string attributes.
+
+## Done
+
+- **Pagination coverage.** `Client.GetAll`/`GetPaginated` follow `next` links,
+  and all collection data sources (except those that take an explicit `page`
+  argument) now return the complete result set instead of only the first page.
 
 ## Planned
 

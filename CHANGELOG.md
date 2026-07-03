@@ -1,5 +1,11 @@
 ## Unreleased
 
+### 🔐 Provider configuration
+
+* Added descriptions to all provider configuration attributes (improves the registry documentation).
+* Marked `password`, `oauth_client_secret` and `oauth_token` as `Sensitive` so they are redacted in Terraform output.
+* Added `make lint` and `make docs` targets.
+
 ### ⚡ Pagination
 
 * List/collection data sources now return the **full** result set instead of only the first page (Bitbucket defaults to 10 items per page). A `Client.GetAll` helper transparently follows `next` links, and 59 collection data sources were switched to it. Endpoints that take an explicit `page` argument (e.g. code search) are intentionally left page-by-page.
