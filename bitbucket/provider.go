@@ -97,6 +97,8 @@ func Provider() *schema.Provider {
 			"bitbucket_user_gpg_key":                resourceUserGpgKey(),
 			"bitbucket_workspace_hook":              resourceWorkspaceHook(),
 			"bitbucket_workspace_variable":          resourceWorkspaceVariable(),
+			"bitbucket_workspace_pipeline_runner":   resourceWorkspacePipelineRunner(),
+			"bitbucket_repository_pipeline_runner":  resourceRepositoryPipelineRunner(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"bitbucket_current_user": dataCurrentUser(),
@@ -213,6 +215,18 @@ func Provider() *schema.Provider {
 			"bitbucket_user_search_code":         dataUserSearchCode(),
 			"bitbucket_webhooks":                 dataWebhooks(),
 			"bitbucket_workspace_search_code":    dataWorkspaceSearchCode(),
+			// New endpoints from latest Bitbucket Cloud API
+			"bitbucket_workspace_pipeline_runners":            dataWorkspacePipelineRunners(),
+			"bitbucket_workspace_pipeline_runner":             dataWorkspacePipelineRunner(),
+			"bitbucket_repository_pipeline_runners":           dataRepositoryPipelineRunners(),
+			"bitbucket_repository_pipeline_runner":            dataRepositoryPipelineRunner(),
+			"bitbucket_file_conflicts":                        dataFileConflicts(),
+			"bitbucket_pull_request_conflicts":                dataPullRequestConflicts(),
+			"bitbucket_user_workspaces":                       dataUserWorkspaces(),
+			"bitbucket_user_workspace_permission":             dataUserWorkspacePermission(),
+			"bitbucket_user_workspace_repository_permissions": dataUserWorkspaceRepositoryPermissions(),
+			"bitbucket_addon_client_key":                      dataAddonClientKey(),
+			"bitbucket_workspace_gpg_public_key":              dataWorkspaceGpgPublicKey(),
 		},
 	}
 }
