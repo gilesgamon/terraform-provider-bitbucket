@@ -1,5 +1,10 @@
 ## Unreleased
 
+### 🧪 CI & Testing
+
+* Added a `Test` GitHub Actions workflow that runs `gofmt`, `go vet`, `go build` and `go test` on every pull request and on pushes to `main`.
+* Added credential-free unit tests for pure helpers (query encoding, pagination link handling, ID parsers, and flatten functions).
+
 ### 📦 Project
 
 * Rewrote the README with accurate resource/data-source counts, authentication guidance and examples.
