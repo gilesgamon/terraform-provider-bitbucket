@@ -1,3 +1,15 @@
+## Unreleased
+
+### 🐛 Bug Fixes
+
+* **HTTP client crash**: Fixed a nil-pointer dereference (segfault) in the HTTP client that occurred on transport-level errors (DNS/connection failures/timeouts). The client now returns the underlying error instead of panicking when no response is received.
+* **`bitbucket_workspace_members`**: Fixed swapped `username` and `display_name` attributes.
+
+### ⚡ Improvements
+
+* **Pagination**: Added a `GetPaginated` client helper that follows Bitbucket `next` links, and adopted it in the `bitbucket_users`, `bitbucket_groups`, `bitbucket_projects`, and `bitbucket_workspaces` data sources so they return the full result set instead of only the first page (default page size of 10).
+* **Query encoding**: Query parameters (for example the `q` filter) are now URL-encoded and emitted in a deterministic order, preventing malformed requests when values contain spaces or special characters.
+
 ## 2.0.0 (December 2024)
 
 ### 🎉 Major Release - Complete API Coverage
