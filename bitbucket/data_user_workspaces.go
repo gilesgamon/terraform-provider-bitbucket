@@ -66,8 +66,8 @@ func dataUserWorkspacesRead(ctx context.Context, d *schema.ResourceData, m inter
 	if v, ok := d.GetOk("sort"); ok {
 		params["sort"] = v.(string)
 	}
-	if v, ok := d.GetOkExists("administrator"); ok {
-		params["administrator"] = fmt.Sprintf("%t", v.(bool))
+	if d.Get("administrator").(bool) {
+		params["administrator"] = "true"
 	}
 
 	if len(params) > 0 {
