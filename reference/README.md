@@ -8,9 +8,27 @@ This directory contains the complete Bitbucket API v3 specification used as the 
 
 ### `swagger.v3.json`
 - **Description**: Complete OpenAPI 3.0 specification for Bitbucket Cloud API v3
-- **Size**: ~357KB (comprehensive API coverage)
-- **Endpoints**: 178 total endpoints
-- **Last Updated**: December 2024
+- **Size**: ~1.4MB (comprehensive API coverage)
+- **Paths**: 193 total paths
+- **Last Updated**: July 2026 (synced with the latest Bitbucket Cloud API)
+
+### Recently added endpoints
+
+The following endpoints were introduced by the latest upstream API sync and are
+now covered by the provider:
+
+- `GET|POST|PUT|DELETE /workspaces/{workspace}/pipelines-config/runners[/{runner_uuid}]`
+- `GET|POST|PUT|DELETE /repositories/{workspace}/{repo_slug}/pipelines-config/runners[/{runner_uuid}]`
+- `GET /repositories/{workspace}/{repo_slug}/file-conflicts/{spec}`
+- `GET /repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/conflicts`
+- `GET /user/workspaces`
+- `GET /user/workspaces/{workspace}/permission`
+- `GET /user/workspaces/{workspace}/permissions/repositories`
+- `GET /addon/{addon_key}/client-key`
+- `GET /workspaces/{workspace}/settings/gpg/public-key`
+
+The `addon/linkers` endpoints were removed upstream and are no longer part of the
+specification.
 
 ## 🔍 API Coverage
 
