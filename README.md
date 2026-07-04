@@ -62,6 +62,32 @@ Every option can also be supplied via environment variables:
 
 Each resource and data source documents the OAuth2 scopes it requires.
 
+### Creating an OAuth consumer
+
+For the OAuth Client Credentials flow, create a *Consumer* by navigating to
+**Workspace settings → OAuth consumers → Add consumer**.
+
+![Add Consumer](./images/AddConsumer.png)
+
+For **Callback URL** use `urn:ietf:wg:oauth:2.0:oob`. The remaining settings are
+at your discretion, but you must grant sufficient **scopes** for the work
+required. For example, attempting to plan without `repository:admin` (which was
+required for the task below) produces:
+
+```text
+│ Error: 403 Forbidden: {"type": "error", "error": {"message": "Your credentials lack one or more required privilege scopes.", "detail": {"required": ["repository:admin"], "granted": ["runner:write", "pipeline:variable", "webhook", "snippet:write", "wiki", "issue:write", "pullrequest:write", "project", "team"]}}}
+```
+
+Scopes cannot be edited after creation — you must re-create the consumer if the
+granted scopes do not meet your needs.
+
+![Details For Consumer](./images/DetailsForConsumer.png)
+
+Once saved, you can access the credentials. The **Key** is the
+`oauth_client_id` and the **Secret** is the `oauth_client_secret`.
+
+![OAuth Secrets](./images/OAuthSecrets.png)
+
 ## Example
 
 ```hcl

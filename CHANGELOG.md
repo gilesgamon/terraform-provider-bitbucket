@@ -1,3 +1,9 @@
+## Unreleased
+
+### 📖 Documentation
+
+* Restored the OAuth consumer setup walkthrough (with screenshots from `images/`) in the README.
+
 ## 0.2.0 (July 2026)
 
 ### 🔐 Provider configuration
